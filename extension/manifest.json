@@ -1,9 +1,19 @@
 {
   "manifest_version": 3,
-  "name": "ShieldBox",
+  "name": "Shield Box - Anti-Phishing Extension",
   "version": "1.0",
-  "description": "AI-based Email Scanner with IoT integration",
-  "permissions": ["storage", "scripting", "activeTab", "tabs"],
+  "description": "Detect phishing emails and suspicious links. Alerts user and IoT device.",
+  "permissions": [
+    "storage",
+    "activeTab",
+    "scripting"
+  ],
+  "host_permissions": [
+    "<all_urls>"
+  ],
+  "action": {
+    "default_popup": "floatingpanel.html"
+  },
   "background": {
     "service_worker": "background.js"
   },
@@ -11,13 +21,6 @@
     {
       "matches": ["https://mail.google.com/*"],
       "js": ["content-script.js"]
-    }
-  ],
-  "host_permissions": ["https://mail.google.com/*"],
-  "web_accessible_resources": [
-    {
-      "resources": ["floatingpanel.html", "floatingpanel.css", "floatingpanel.js"],
-      "matches": ["<all_urls>"]
     }
   ]
 }

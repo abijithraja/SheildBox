@@ -1,49 +1,52 @@
-document.addEventListener("DOMContentLoaded", () => {
-  const scanBtn = document.getElementById("scanBtn");
-  const resultBox = document.getElementById("resultBox");
-  const resultText = document.getElementById("result");
-  const darkToggle = document.getElementById("darkModeToggle");
-  const autoToggle = document.getElementById("autoScanToggle");
+document.getElementById("scanButton").addEventListener("click", () => {
+  const url = document.getElementById("urlInput").value.trim();
+  if (!url) return;
 
-  // Restore toggle states
-  chrome.storage.sync.get(["darkMode", "autoScan"], (data) => {
-    darkToggle.checked = data.darkMode || false;
-    autoToggle.checked = data.autoScan || false;
-    if (data.darkMode) document.body.classList.add("dark");
-  });
+  fetch("http://localhost:5000/scan_url", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ url: url })
+  })
+    .then(res => res.json())
+    .then(data => {
+      const { risk_score, status } = data; // Assume 0–100 score
+      document.getElementById("scanResult").innerText = `Result: ${status}`;
+      document.getElementById("riskBar").style.width = `${risk_score}%`;
+      document.getElementById("riskBar").style.backgroundColor = risk_score > 60 ? "red" : (risk_score > 30 ? "orange" : "green");
 
-  // Dark Mode Toggle
-  darkToggle.addEventListener("change", (e) => {
-    const enabled = e.target.checked;
-    document.body.classList.toggle("dark", enabled);
-    chrome.storage.sync.set({ darkMode: enabled });
-  });
-
-  // Auto Scan Toggle
-  autoToggle.addEventListener("change", (e) => {
-    chrome.storage.sync.set({ autoScan: e.target.checked });
-  });
-
-  // Scan Email button
-  scanBtn.addEventListener("click", () => {
-    resultText.innerText = "Scanning...";
-    resultBox.classList.remove("hidden");
-
-    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-      const tab = tabs[0];
-      if (tab.url.includes("mail.google.com")) {
-        chrome.tabs.sendMessage(tab.id, { action: "scanEmail" });
-      } else {
-        resultText.innerText = "Please open Gmail to scan emails.";
+      // Optional: Notify ESP32 (if risk is high)
+      if (risk_score > 60) {
+        fetch("http://<ESP32_IP>/alert", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ message: "Suspicious Link Found" })
+        }).then(() => {
+          document.getElementById("espStatus").innerText = "ESP32 Alert: ✅ Sent";
+        }).catch(() => {
+          document.getElementById("espStatus").innerText = "ESP32 Alert: ❌ Failed";
+        });
       }
+    })
+    .catch(() => {
+      document.getElementById("scanResult").innerText = "Error scanning URL.";
     });
+    document.addEventListener("DOMContentLoaded", () => {
+  const toggle = document.getElementById("darkToggle");
+
+  // Load saved theme
+  if (localStorage.getItem("darkMode") === "true") {
+    document.body.classList.add("dark");
+    toggle.checked = true;
+  }
+
+  toggle.addEventListener("change", () => {
+    document.body.classList.toggle("dark");
+    localStorage.setItem("darkMode", toggle.checked);
   });
 
-  // Listen for scan result
-  chrome.runtime.onMessage.addListener((request) => {
-    if (request.action === "displayResult") {
-      resultText.innerText = request.message;
-      resultBox.classList.remove("hidden");
-    }
+  // Dummy Scan button (optional)
+  document.querySelector("button").addEventListener("click", () => {
+    alert("This is a dummy scan. Backend not connected yet.");
   });
+});
 });

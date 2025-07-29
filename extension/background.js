@@ -1,5 +1,5 @@
-chrome.runtime.onInstalled.addListener(() => {
-  if (chrome.storage && chrome.storage.sync) {
-    chrome.storage.sync.set({ autoScan: false, darkMode: false });
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  if (message.type === "email-scan") {
+    chrome.storage.local.set({ emailScanResult: message.result });
   }
 });
