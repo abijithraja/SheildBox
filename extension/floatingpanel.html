@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <title>ShieldBox</title>
+  <link rel="stylesheet" href="floatingpanel.css" />
+</head>
+<body>
+  <div id="popup-container">
+    <h2 class="title">ShieldBox</h2>
+
+    <div class="toggle-row">
+      <label class="switch">
+        <input type="checkbox" id="darkModeToggle" />
+        <span class="slider"></span>
+      </label>
+      <span>Dark Mode</span>
+    </div>
+
+    <div class="toggle-row">
+      <label class="switch">
+        <input type="checkbox" id="autoScanToggle" />
+        <span class="slider"></span>
+      </label>
+      <span>Auto Scan</span>
+    </div>
+
+    <button id="scanBtn">Scan Email</button>
+
+    <div id="resultBox" class="hidden">
+      <h4>Scan Result:</h4>
+      <div id="result"></div>
+    </div>
+  </div>
+
+  <script src="floatingpanel.js"></script>
+</body>
+</html>

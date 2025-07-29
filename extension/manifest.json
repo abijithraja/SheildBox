@@ -1,0 +1,23 @@
+{
+  "manifest_version": 3,
+  "name": "ShieldBox",
+  "version": "1.0",
+  "description": "AI-based Email Scanner with IoT integration",
+  "permissions": ["storage", "scripting", "activeTab", "tabs"],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://mail.google.com/*"],
+      "js": ["content-script.js"]
+    }
+  ],
+  "host_permissions": ["https://mail.google.com/*"],
+  "web_accessible_resources": [
+    {
+      "resources": ["floatingpanel.html", "floatingpanel.css", "floatingpanel.js"],
+      "matches": ["<all_urls>"]
+    }
+  ]
+}
