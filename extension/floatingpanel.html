@@ -4,18 +4,18 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Shield Box</title>
-  <link rel="stylesheet" href="popup.css" />
+  <link rel="stylesheet" href="floatingpanel.css" />
 </head>
 <body>
   <div class="popup-container light" id="themeContainer">
     <div class="popup-header">
-      🛡️ Shield Box
-      <button id="darkToggle">☀️</button>
+      Shield Box
+      <button id="darkToggle"></button>
     </div>
 
     <div class="popup-section">
       <div class="popup-toggle">
-        <span>📦 Auto Scan</span>
+        <span>Auto Scan</span>
         <label class="switch">
           <input type="checkbox" id="autoScanToggle" />
           <span class="slider"></span>
@@ -23,7 +23,7 @@
       </div>
 
       <div class="popup-toggle">
-        <span>🌐 IoT Alert</span>
+        <span>IoT Alert</span>
         <label class="switch">
           <input type="checkbox" id="iotToggle" />
           <span class="slider"></span>
@@ -32,16 +32,16 @@
     </div>
 
     <div class="popup-section">
-      <strong>📨 Email Result:</strong>
+      <strong>Email Result:</strong>
       <div id="emailResult" class="status-text">No scan yet.</div>
     </div>
 
     <div class="popup-section">
-      <strong>📡 IoT Status:</strong>
+      <strong>IoT Status:</strong>
       <div id="iotStatus" class="status-text">Waiting...</div>
     </div>
   </div>
 
-  <script src="popup.js"></script>
+  <script src="floatingpanel.js"></script>
 </body>
 </html>

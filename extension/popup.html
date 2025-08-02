@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Shield Box</title>
+  <link rel="stylesheet" href="popup.css" />
+</head>
+<body>
+  <div class="container">
+    <h1>🛡️ Shield Box</h1>
+    <input type="text" id="urlInput" placeholder="Enter link to scan..." />
+    
+    <div class="scan-toggle">
+      <label><input type="radio" name="scanMode" value="quick" checked> Quick</label>
+      <label><input type="radio" name="scanMode" value="deep"> Deep</label>
+    </div>
+
+    <button id="scanBtn">Scan Now</button>
+
+    <div id="resultBox" class="hidden">
+      <p>Risk Level:</p>
+      <div class="risk-bar" id="riskBar"></div>
+      <p id="riskText"></p>
+    </div>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>

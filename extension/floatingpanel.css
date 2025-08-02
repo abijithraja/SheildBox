@@ -1,43 +1,59 @@
+/* Remove default white box from shadow host */
+:host {
+  background: transparent !important;
+  box-shadow: none !important;
+  border: none !important;
+  display: block;
+}
+
 body {
   margin: 0;
-  font-family: 'Segoe UI', sans-serif;
+  font-family: 'Segoe UI', 'Arial', sans-serif;
 }
 
 .popup-container {
-  width: 300px;
-  border-radius: 16px;
+  width: 320px;
+  border-radius: 20px;
   overflow: hidden;
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
-  transition: background 0.3s, color 0.3s;
+  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+  background: rgba(255, 255, 255, 0.03);
+  border: 1.5px solid rgba(255,255,255,0.10);
+  backdrop-filter: blur(18px) saturate(180%);
+  -webkit-backdrop-filter: blur(18px) saturate(180%);
+  color: #222;
+  transition: box-shadow 0.3s, background 0.3s;
 }
 
 .popup-header {
-  padding: 14px 18px;
-  font-weight: bold;
-  font-size: 16px;
+  padding: 18px 22px;
+  font-weight: 700;
+  font-size: 18px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  cursor: default;
+  background: rgba(255,255,255,0.18);
+  border-bottom: 1px solid rgba(255,255,255,0.18);
+  letter-spacing: 0.5px;
 }
 
 .popup-section {
-  padding: 14px 18px;
-  border-top: 1px solid var(--divider);
+  padding: 16px 22px;
+  border-top: 1px solid rgba(255,255,255,0.13);
+  background: transparent;
 }
 
 .popup-toggle {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin: 10px 0;
+  margin: 12px 0;
 }
 
 /* Toggle switch */
 .switch {
   position: relative;
   display: inline-block;
-  width: 50px;
+  width: 48px;
   height: 24px;
 }
 .switch input {
@@ -50,9 +66,10 @@ body {
   cursor: pointer;
   top: 0; left: 0;
   right: 0; bottom: 0;
-  background-color: #ccc;
+  background: rgba(200,200,200,0.5);
   transition: 0.4s;
   border-radius: 34px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
 }
 .slider:before {
   position: absolute;
@@ -61,40 +78,36 @@ body {
   width: 18px;
   left: 3px;
   bottom: 3px;
-  background-color: white;
+  background: #fff;
   transition: 0.4s;
   border-radius: 50%;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.10);
 }
 input:checked + .slider {
-  background-color: #00cc99;
+  background: linear-gradient(90deg, #00cc99 60%, #00e6d8 100%);
 }
 input:checked + .slider:before {
-  transform: translateX(26px);
+  transform: translateX(24px);
 }
 
 .status-text {
-  font-size: 14px;
-  margin-top: 6px;
+  font-size: 15px;
+  margin-top: 8px;
+  color: #333;
+  word-break: break-word;
 }
 
 /* Theme variables */
 .light {
-  --bg: #ffffff;
   --text: #222;
-  --header: #f4f4f4;
-  --divider: #ddd;
 }
 .dark {
-  --bg: #1e1e2f;
   --text: #eee;
-  --header: #2e2e3e;
-  --divider: #444;
 }
 
 .popup-container {
-  background: var(--bg);
   color: var(--text);
 }
 .popup-header {
-  background: var(--header);
+  color: var(--text);
 }
