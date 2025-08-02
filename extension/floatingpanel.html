@@ -2,44 +2,46 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Shield Box</title>
-  <link rel="stylesheet" href="floatingpanel.css" />
+  <link rel="stylesheet" href="popup.css" />
 </head>
 <body>
-  <div class="container">
-    <h2> Shield Box</h2>
+  <div class="popup-container light" id="themeContainer">
+    <div class="popup-header">
+      🛡️ Shield Box
+      <button id="darkToggle">☀️</button>
+    </div>
 
-    <section>
-      <h3> Email Scan</h3>
-      <p>Status: <span class="alert">Phishing Detected</span></p>
-      <p>Links Found: <strong>2</strong></p>
-    </section>
-
-    <section>
-      <h3>🔍 Manual Link Scan</h3>
-      <div class="manual-scan">
-        <input type="text" value="https://suspicious.link" readonly />
-        <button>Scan</button>
+    <div class="popup-section">
+      <div class="popup-toggle">
+        <span>📦 Auto Scan</span>
+        <label class="switch">
+          <input type="checkbox" id="autoScanToggle" />
+          <span class="slider"></span>
+        </label>
       </div>
-      <p>Result: <span class="bad"> Suspicious Link</span></p>
-      <div class="risk-bar">
-        <div class="risk-fill" style="width: 50%"></div>
+
+      <div class="popup-toggle">
+        <span>🌐 IoT Alert</span>
+        <label class="switch">
+          <input type="checkbox" id="iotToggle" />
+          <span class="slider"></span>
+        </label>
       </div>
-    </section>
+    </div>
 
-    <section>
-      <h3>ESP32 Alert Sent </h3>
-    </section>
+    <div class="popup-section">
+      <strong>📨 Email Result:</strong>
+      <div id="emailResult" class="status-text">No scan yet.</div>
+    </div>
 
-    <div class="toggle">
-      <label>
-        <input type="checkbox" id="darkToggle" />
-        Dark Mode
-      </label>
+    <div class="popup-section">
+      <strong>📡 IoT Status:</strong>
+      <div id="iotStatus" class="status-text">Waiting...</div>
     </div>
   </div>
 
-  <script src="floatingpanel.js"></script>
+  <script src="popup.js"></script>
 </body>
 </html>
