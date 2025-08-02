@@ -4,23 +4,24 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Shield Box</title>
-  <link rel="stylesheet" href="popup.css" />
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
   <div class="container glassy">
     <h2>🛡️ Shield Box</h2>
 
     <!-- Manual Scan Section -->
-    <div class="section">
-      <label class="section-title">Manual Link Scanner</label>
-      <input type="text" id="urlInput" placeholder="Enter URL..." />
-      <button id="scanBtn">Scan Now</button>
-      <div id="manualResultBox" class="result-box">No manual scan yet.</div>
+    <div class="card">
+      <div class="card-header">🔗 Manual Link Scan</div>
+      <input type="text" id="urlInput" placeholder="Paste URL here..." />
+      <button id="scanBtn">🚀 Scan</button>
+      <div id="manualResultBox" class="result-box">No scan yet.</div>
     </div>
 
-    <!-- Toggles -->
-    <div class="section">
-      <label class="section-title">Controls</label>
+    <!-- Toggles Section -->
+    <div class="card">
+      <div class="card-header">⚙️ Controls</div>
+
       <div class="toggle-row">
         <span>Auto Scan</span>
         <label class="switch">
@@ -38,10 +39,10 @@
       </div>
     </div>
 
-    <!-- Auto Scan Result Box -->
-    <div class="section">
-      <label class="section-title">Auto Scan Status</label>
-      <div id="autoResultBox" class="result-box">Auto scan is idle.</div>
+    <!-- Auto Scan Result -->
+    <div class="card">
+      <div class="card-header">📊 Auto Scan Status</div>
+      <div id="autoResultBox" class="result-box">Auto scan idle.</div>
     </div>
   </div>
 

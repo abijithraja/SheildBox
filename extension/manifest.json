@@ -1,27 +1,23 @@
 {
   "manifest_version": 3,
-  "name": "Shield Box Floating Panel",
+  "name": "Shield Box",
   "version": "1.0",
-  "description": "Scan URLs for phishing threats using AI",
-  "permissions": ["scripting", "activeTab"],
-  "action": {
-    "default_title": "Shield Box"
-  },
-  "background": {
-    "service_worker": "background.js"
-  },
-  "host_permissions": [
-    "http://*/*",
-    "https://*/*"
+  "description": "Injects Shield Box phishing alert panel",
+  "permissions": ["scripting", "tabs"],
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["floatingpanel.js"],
+      "run_at": "document_idle"
+    }
   ],
   "web_accessible_resources": [
     {
-      "resources": [
-        "shieldPanel.js",
-        "shieldPanel.css",
-        "floatingpanel.html"
-      ],
+      "resources": ["floatingpanel.html", "style.css"],
       "matches": ["<all_urls>"]
     }
-  ]
+  ],
+  "action": {
+    "default_title": "Shield Box"
+  }
 }

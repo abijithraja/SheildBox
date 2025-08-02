@@ -2,68 +2,52 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Shield Box Floating Panel</title>
-  <link rel="stylesheet" href="shieldPanel.css" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Shield Box</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <!-- Draggable Glossy Container -->
-  <div class="phishvault-container" id="draggable-container">
-
-    <!-- Header Bar (Drag Handle) -->
-    <div class="phishvault-header" id="drag-handle"> Shield Box</div>
-
-    <!-- URL Input Field -->
-    <label for="urlInput">Enter or paste a URL:</label>
-    <input type="text" id="urlInput" placeholder="https://example.com" />
-
-    <!-- Scan Mode Selection -->
-    <div class="scan-mode">
-      <label for="scanMode">Scan Mode:</label>
-      <select id="scanMode">
-        <option value="quick">Quick</option>
-        <option value="deep">Deep</option>
-      </select>
+  <div class="floating-container">
+    <div class="panel-header">
+      <span>Shield Box</span>
+      <div class="dark-toggle-container">
+        <span>Dark Mode</span>
+        <label class="switch">
+          <input type="checkbox" id="darkModeToggle">
+          <span class="slider round"></span>
+        </label>
+      </div>
     </div>
 
-    <!-- AI Explanation Toggle -->
-    <div class="ai-toggle">
-      <input type="checkbox" id="useAI" />
-      <label for="useAI">Explain using AI (ChatGPT)</label>
+    <div class="card">
+      <label for="urlInput" class="label-title">Manual Scan</label>
+      <input type="text" id="urlInput" placeholder="Paste link to scan..." />
+      <button id="scanBtn">Scan</button>
+      <div id="manualResultBox" class="result-box">Awaiting scan...</div>
     </div>
 
-    <!-- Dark Mode Toggle -->
-    <div class="darkmode-toggle">
-      <input type="checkbox" id="darkModeToggle" />
-      <label for="darkModeToggle">Dark Mode</label>
+    <div class="card">
+      <div class="label-title">Controls</div>
+      <div class="toggle-row">
+        <span>Auto Scan</span>
+        <label class="switch">
+          <input type="checkbox" id="autoScanToggle" checked />
+          <span class="slider"></span>
+        </label>
+      </div>
+      <div class="toggle-row">
+        <span>IoT Alerts</span>
+        <label class="switch">
+          <input type="checkbox" id="iotToggle" checked />
+          <span class="slider"></span>
+        </label>
+      </div>
     </div>
 
-    <!-- Buttons: Scan Link & Scan Page -->
-    <div class="button-group">
-      <button id="scanBtn"> Scan Link</button>
-      <button id="scanPageBtn">Scan This Page</button>
+    <div class="card">
+      <div class="label-title">Auto Scan Result</div>
+      <div id="autoResultBox" class="result-box">No activity yet.</div>
     </div>
-
-    <!-- Result Box -->
-    <div id="resultBox" class="hidden">
-      <h4>Result:</h4>
-      <div id="result"></div>
-    </div>
-
-    <hr />
-
-    <!-- Data Leak Checker Section -->
-    <label for="leakInput"> Check Data Leak (Email / Phone):</label>
-    <input type="text" id="leakInput" placeholder="email@example.com or 9876543210" />
-    <button id="checkLeakBtn"> Check</button>
-
-    <!-- Leak Result -->
-    <div id="leakResultBox" class="hidden">
-      <h4>Leak Check Result:</h4>
-      <div id="leakResult"></div>
-    </div>
-
   </div>
-
-  <script src="shieldPanel.js"></script>
 </body>
 </html>

@@ -6,7 +6,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const manualResultBox = document.getElementById('manualResultBox');
   const autoResultBox = document.getElementById('autoResultBox');
 
-  // Load toggle states
+  // Load saved states
   chrome.storage.sync.get(['autoScan', 'iotEnabled'], (data) => {
     autoScanToggle.checked = data.autoScan ?? true;
     iotToggle.checked = data.iotEnabled ?? true;
@@ -15,8 +15,8 @@ document.addEventListener('DOMContentLoaded', () => {
   autoScanToggle.addEventListener('change', () => {
     chrome.storage.sync.set({ autoScan: autoScanToggle.checked });
     autoResultBox.textContent = autoScanToggle.checked
-      ? "Auto scan is enabled."
-      : "Auto scan is disabled.";
+      ? "Auto scan enabled."
+      : "Auto scan disabled.";
   });
 
   iotToggle.addEventListener('change', () => {
@@ -26,31 +26,37 @@ document.addEventListener('DOMContentLoaded', () => {
   scanBtn.addEventListener('click', () => {
     const url = urlInput.value.trim();
     if (!url) {
-      manualResultBox.textContent = "Please enter a valid URL.";
+      manualResultBox.textContent = "Please enter a URL.";
+      manualResultBox.className = "result-box";
       return;
     }
 
     manualResultBox.textContent = "Scanning...";
+    manualResultBox.className = "result-box";
+
     setTimeout(() => {
-      const isPhishing = /login|verify|bank/i.test(url);
+      const isPhishing = /login|verify|bank|confirm/i.test(url);
       if (isPhishing) {
         chrome.storage.sync.get('iotEnabled', (data) => {
           const iotStatus = data.iotEnabled;
           manualResultBox.textContent = iotStatus
             ? "⚠️ Phishing detected. IoT alert sent!"
             : "⚠️ Phishing detected.";
+          manualResultBox.className = "result-box phishing";
         });
       } else {
         manualResultBox.textContent = "✅ Link is safe.";
+        manualResultBox.className = "result-box safe";
       }
-    }, 1500);
+    }, 1200);
   });
 
-  // Simulate an auto scan result
+  // Simulate auto scan result
   chrome.storage.sync.get('autoScan', (data) => {
     if (data.autoScan) {
       setTimeout(() => {
-        autoResultBox.textContent = "✅ No threats detected during auto scan.";
+        autoResultBox.textContent = "✅ No threats found during auto scan.";
+        autoResultBox.className = "result-box safe";
       }, 1000);
     }
   });
