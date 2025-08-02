@@ -1,21 +1,23 @@
 {
   "manifest_version": 3,
-  "name": "Shield Box - Anti-Phishing Extension",
+  "name": "Shield Box",
   "version": "1.0",
-  "description": "Detect phishing emails and suspicious links. Alerts user and IoT device.",
-  "permissions": [
-    "storage",
-    "activeTab",
-    "scripting"
+  "description": "Injects Shield Box phishing alert panel",
+  "permissions": ["scripting", "tabs"],
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["floatingpanel.js"],
+      "run_at": "document_idle"
+    }
   ],
-  "host_permissions": [
-    "<all_urls>"
+  "web_accessible_resources": [
+    {
+      "resources": ["floatingpanel.html", "style.css"],
+      "matches": ["<all_urls>"]
+    }
   ],
   "action": {
-    "default_popup": "floatingpanel.html"
-  },
-  "background": {
-    "service_worker": "background.js"
-  },
-  // Removed content_scripts section for popup-only extension
+    "default_title": "Shield Box"
+  }
 }

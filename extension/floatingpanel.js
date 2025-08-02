@@ -1,52 +1,64 @@
-document.getElementById("scanButton").addEventListener("click", () => {
-  const url = document.getElementById("urlInput").value.trim();
-  if (!url) return;
+// Inject floatingpanel.html inside Shadow DOM
+fetch(chrome.runtime.getURL('floatingpanel.html'))
+  .then(res => res.text())
+  .then(html => {
+    const container = document.createElement('div');
+    container.id = 'shieldbox-floating-panel';
+    container.style.position = 'fixed';
+    container.style.top = '100px';
+    container.style.left = '100px';
+    container.style.zIndex = '999999';
 
-  fetch("http://localhost:5000/scan_url", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ url: url })
-  })
-    .then(res => res.json())
-    .then(data => {
-      const { risk_score, status } = data; // Assume 0–100 score
-      document.getElementById("scanResult").innerText = `Result: ${status}`;
-      document.getElementById("riskBar").style.width = `${risk_score}%`;
-      document.getElementById("riskBar").style.backgroundColor = risk_score > 60 ? "red" : (risk_score > 30 ? "orange" : "green");
+    const shadow = container.attachShadow({ mode: 'open' });
+    shadow.innerHTML = html;
 
-      // Optional: Notify ESP32 (if risk is high)
-      if (risk_score > 60) {
-        fetch("http://<ESP32_IP>/alert", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ message: "Suspicious Link Found" })
-        }).then(() => {
-          document.getElementById("espStatus").innerText = "ESP32 Alert:  Sent";
-        }).catch(() => {
-          document.getElementById("espStatus").innerText = "ESP32 Alert:  Failed";
-        });
+    const styleLink = document.createElement('link');
+    styleLink.rel = 'stylesheet';
+    styleLink.href = chrome.runtime.getURL('style.css');
+    shadow.appendChild(styleLink);
+
+    document.body.appendChild(container);
+
+    // Theme toggle logic
+    const interval = setInterval(() => {
+      const darkModeToggle = shadow.getElementById("darkModeToggle");
+      if (!darkModeToggle) return;
+
+      clearInterval(interval); // Wait until it's available
+
+      const savedTheme = localStorage.getItem("theme");
+
+      function applyTheme(mode) {
+        if (mode === "dark") {
+          shadow.host.classList.add("dark-mode");
+          darkModeToggle.checked = true;
+        } else {
+          shadow.host.classList.remove("dark-mode");
+          darkModeToggle.checked = false;
+        }
+        localStorage.setItem("theme", mode);
       }
-    })
-    .catch(() => {
-      document.getElementById("scanResult").innerText = "Error scanning URL.";
-    });
-    document.addEventListener("DOMContentLoaded", () => {
-  const toggle = document.getElementById("darkToggle");
 
-  // Load saved theme
-  if (localStorage.getItem("darkMode") === "true") {
-    document.body.classList.add("dark");
-    toggle.checked = true;
-  }
+      darkModeToggle.addEventListener("change", () => {
+        const newMode = darkModeToggle.checked ? "dark" : "light";
+        applyTheme(newMode);
+      });
 
-  toggle.addEventListener("change", () => {
-    document.body.classList.toggle("dark");
-    localStorage.setItem("darkMode", toggle.checked);
+      applyTheme(savedTheme || "light");
+    }, 50);
+
+    // Draggable logic
+    let isDragging = false, offsetX, offsetY;
+    container.onmousedown = e => {
+      isDragging = true;
+      offsetX = e.clientX - container.offsetLeft;
+      offsetY = e.clientY - container.offsetTop;
+    };
+    document.onmousemove = e => {
+      if (isDragging) {
+        container.style.left = `${e.clientX - offsetX}px`;
+        container.style.top = `${e.clientY - offsetY}px`;
+      }
+    };
+    document.onmouseup = () => (isDragging = false);
   });
-
-  // Dummy Scan button (optional)
-  document.querySelector("button").addEventListener("click", () => {
-    alert("This is a dummy scan. Backend not connected yet.");
-  });
-});
-});

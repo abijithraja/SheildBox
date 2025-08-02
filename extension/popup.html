@@ -7,27 +7,21 @@
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <div class="floating-container">
-    <div class="panel-header">
-      <span>Shield Box</span>
-      <div class="dark-toggle-container">
-        <span>Dark Mode</span>
-        <label class="switch">
-          <input type="checkbox" id="darkModeToggle">
-          <span class="slider round"></span>
-        </label>
-      </div>
+  <div class="container glassy">
+    <h2>🛡️ Shield Box</h2>
+
+    <!-- Manual Scan Section -->
+    <div class="card">
+      <div class="card-header">🔗 Manual Link Scan</div>
+      <input type="text" id="urlInput" placeholder="Paste URL here..." />
+      <button id="scanBtn">🚀 Scan</button>
+      <div id="manualResultBox" class="result-box">No scan yet.</div>
     </div>
 
+    <!-- Toggles Section -->
     <div class="card">
-      <label for="urlInput" class="label-title">Manual Scan</label>
-      <input type="text" id="urlInput" placeholder="Paste link to scan..." />
-      <button id="scanBtn">Scan</button>
-      <div id="manualResultBox" class="result-box">Awaiting scan...</div>
-    </div>
+      <div class="card-header">⚙️ Controls</div>
 
-    <div class="card">
-      <div class="label-title">Controls</div>
       <div class="toggle-row">
         <span>Auto Scan</span>
         <label class="switch">
@@ -35,6 +29,7 @@
           <span class="slider"></span>
         </label>
       </div>
+
       <div class="toggle-row">
         <span>IoT Alerts</span>
         <label class="switch">
@@ -44,10 +39,13 @@
       </div>
     </div>
 
+    <!-- Auto Scan Result -->
     <div class="card">
-      <div class="label-title">Auto Scan Result</div>
-      <div id="autoResultBox" class="result-box">No activity yet.</div>
+      <div class="card-header">📊 Auto Scan Status</div>
+      <div id="autoResultBox" class="result-box">Auto scan idle.</div>
     </div>
   </div>
+
+  <script src="popup.js"></script>
 </body>
 </html>
