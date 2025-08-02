@@ -21,9 +21,9 @@ document.getElementById("scanButton").addEventListener("click", () => {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ message: "Suspicious Link Found" })
         }).then(() => {
-          document.getElementById("espStatus").innerText = "ESP32 Alert: ✅ Sent";
+          document.getElementById("espStatus").innerText = "ESP32 Alert:  Sent";
         }).catch(() => {
-          document.getElementById("espStatus").innerText = "ESP32 Alert: ❌ Failed";
+          document.getElementById("espStatus").innerText = "ESP32 Alert:  Failed";
         });
       }
     })
