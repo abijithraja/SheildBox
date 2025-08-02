@@ -1,31 +1,57 @@
-document.getElementById('scanBtn').addEventListener('click', async () => {
-  const url = document.getElementById('urlInput').value;
-  const mode = document.querySelector('input[name="scanMode"]:checked').value;
+document.addEventListener('DOMContentLoaded', () => {
+  const autoScanToggle = document.getElementById('autoScanToggle');
+  const iotToggle = document.getElementById('iotToggle');
+  const scanBtn = document.getElementById('scanBtn');
+  const urlInput = document.getElementById('urlInput');
+  const manualResultBox = document.getElementById('manualResultBox');
+  const autoResultBox = document.getElementById('autoResultBox');
 
-  if (!url) {
-    alert("Please enter a URL to scan.");
-    return;
-  }
+  // Load toggle states
+  chrome.storage.sync.get(['autoScan', 'iotEnabled'], (data) => {
+    autoScanToggle.checked = data.autoScan ?? true;
+    iotToggle.checked = data.iotEnabled ?? true;
+  });
 
-  // Mock result – real API call will go here later
-  const risk = Math.floor(Math.random() * 100); // random risk for now
+  autoScanToggle.addEventListener('change', () => {
+    chrome.storage.sync.set({ autoScan: autoScanToggle.checked });
+    autoResultBox.textContent = autoScanToggle.checked
+      ? "Auto scan is enabled."
+      : "Auto scan is disabled.";
+  });
 
-  const riskBar = document.getElementById('riskBar');
-  const riskText = document.getElementById('riskText');
-  const resultBox = document.getElementById('resultBox');
-  resultBox.classList.remove('hidden');
+  iotToggle.addEventListener('change', () => {
+    chrome.storage.sync.set({ iotEnabled: iotToggle.checked });
+  });
 
-  // Set color based on risk level
-  if (risk < 30) {
-    riskBar.style.background = "#00ff00";
-    riskText.innerText = "Low Risk (" + risk + "%)";
-  } else if (risk < 70) {
-    riskBar.style.background = "#ffff00";
-    riskText.innerText = "Medium Risk (" + risk + "%)";
-  } else {
-    riskBar.style.background = "#ff0000";
-    riskText.innerText = "High Risk (" + risk + "%)";
-  }
+  scanBtn.addEventListener('click', () => {
+    const url = urlInput.value.trim();
+    if (!url) {
+      manualResultBox.textContent = "Please enter a valid URL.";
+      return;
+    }
 
-  riskBar.style.width = `${risk}%`;
+    manualResultBox.textContent = "Scanning...";
+    setTimeout(() => {
+      const isPhishing = /login|verify|bank/i.test(url);
+      if (isPhishing) {
+        chrome.storage.sync.get('iotEnabled', (data) => {
+          const iotStatus = data.iotEnabled;
+          manualResultBox.textContent = iotStatus
+            ? "⚠️ Phishing detected. IoT alert sent!"
+            : "⚠️ Phishing detected.";
+        });
+      } else {
+        manualResultBox.textContent = "✅ Link is safe.";
+      }
+    }, 1500);
+  });
+
+  // Simulate an auto scan result
+  chrome.storage.sync.get('autoScan', (data) => {
+    if (data.autoScan) {
+      setTimeout(() => {
+        autoResultBox.textContent = "✅ No threats detected during auto scan.";
+      }, 1000);
+    }
+  });
 });

@@ -1,21 +1,27 @@
 {
   "manifest_version": 3,
-  "name": "Shield Box",
+  "name": "Shield Box Floating Panel",
   "version": "1.0",
-  "description": "AI-powered phishing alert system with IoT integration",
-  "permissions": ["activeTab", "scripting", "storage"],
+  "description": "Scan URLs for phishing threats using AI",
+  "permissions": ["scripting", "activeTab"],
   "action": {
-    "default_popup": "popup.html"
-  
+    "default_title": "Shield Box"
   },
   "background": {
     "service_worker": "background.js"
   },
-  "content_scripts": [
+  "host_permissions": [
+    "http://*/*",
+    "https://*/*"
+  ],
+  "web_accessible_resources": [
     {
-      "matches": ["https://mail.google.com/*"],
-      "js": ["content.js"]
+      "resources": [
+        "shieldPanel.js",
+        "shieldPanel.css",
+        "floatingpanel.html"
+      ],
+      "matches": ["<all_urls>"]
     }
   ]
-  
 }

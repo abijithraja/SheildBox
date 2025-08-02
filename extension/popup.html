@@ -2,25 +2,46 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Shield Box</title>
   <link rel="stylesheet" href="popup.css" />
 </head>
 <body>
-  <div class="container">
-    <h1>🛡️ Shield Box</h1>
-    <input type="text" id="urlInput" placeholder="Enter link to scan..." />
-    
-    <div class="scan-toggle">
-      <label><input type="radio" name="scanMode" value="quick" checked> Quick</label>
-      <label><input type="radio" name="scanMode" value="deep"> Deep</label>
+  <div class="container glassy">
+    <h2>🛡️ Shield Box</h2>
+
+    <!-- Manual Scan Section -->
+    <div class="section">
+      <label class="section-title">Manual Link Scanner</label>
+      <input type="text" id="urlInput" placeholder="Enter URL..." />
+      <button id="scanBtn">Scan Now</button>
+      <div id="manualResultBox" class="result-box">No manual scan yet.</div>
     </div>
 
-    <button id="scanBtn">Scan Now</button>
+    <!-- Toggles -->
+    <div class="section">
+      <label class="section-title">Controls</label>
+      <div class="toggle-row">
+        <span>Auto Scan</span>
+        <label class="switch">
+          <input type="checkbox" id="autoScanToggle" checked />
+          <span class="slider"></span>
+        </label>
+      </div>
 
-    <div id="resultBox" class="hidden">
-      <p>Risk Level:</p>
-      <div class="risk-bar" id="riskBar"></div>
-      <p id="riskText"></p>
+      <div class="toggle-row">
+        <span>IoT Alerts</span>
+        <label class="switch">
+          <input type="checkbox" id="iotToggle" checked />
+          <span class="slider"></span>
+        </label>
+      </div>
+    </div>
+
+    <!-- Auto Scan Result Box -->
+    <div class="section">
+      <label class="section-title">Auto Scan Status</label>
+      <div id="autoResultBox" class="result-box">Auto scan is idle.</div>
     </div>
   </div>
 
