@@ -20,12 +20,16 @@
     </div>
 
     <div class="card">
-      <label for="urlInput" class="label-title">Manual Scan</label>
+      <label for="urlInput" class="label-title">Manual Link Scan</label>
       <input type="text" id="urlInput" placeholder="Paste link to scan..." />
       <button id="scanBtn">Scan</button>
-      <div id="manualResultBox" class="result-box">Awaiting scan...</div>
+      <div id="manual-link-result" class="result-box">No activity yet</div>
     </div>
 
+    <div class="card">
+      <button id="scanEmailBtn">Scan Email</button>
+      <div id="manual-email-result" class="result-box">No activity yet</div>
+    </div>
     <div class="card">
       <div class="label-title">Controls</div>
       <div class="toggle-row">
@@ -46,7 +50,7 @@
 
     <div class="card">
       <div class="label-title">Auto Scan Result</div>
-      <div id="autoResultBox" class="result-box">No activity yet.</div>
+      <div id="auto-scan-result" class="result-box">No activity yet</div>
     </div>
   </div>
 </body>

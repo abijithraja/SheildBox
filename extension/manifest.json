@@ -3,11 +3,30 @@
   "name": "Shield Box",
   "version": "1.0",
   "description": "Injects Shield Box phishing alert panel",
-  "permissions": ["scripting", "tabs"],
+  "action": {
+    "default_title": "Shield Box"
+  },
+  "permissions": [
+    "scripting",
+    "tabs",
+    "storage"
+  ],
+  "host_permissions": [
+    "http://127.0.0.1:5000/*",
+    "https://mail.google.com/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
   "content_scripts": [
     {
       "matches": ["<all_urls>"],
       "js": ["floatingpanel.js"],
+      "run_at": "document_idle"
+    },
+    {
+      "matches": ["https://mail.google.com/*"],
+      "js": ["emailParser.js"],
       "run_at": "document_idle"
     }
   ],
@@ -17,7 +36,7 @@
       "matches": ["<all_urls>"]
     }
   ],
-  "action": {
-    "default_title": "Shield Box"
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'self'; connect-src 'self' http://127.0.0.1:5000 http://localhost:5000"
   }
 }

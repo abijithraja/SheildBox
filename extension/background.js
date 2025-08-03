@@ -1,13 +1,31 @@
-chrome.action.onClicked.addListener((tab) => {
-  // Inject CSS
-  chrome.scripting.insertCSS({
-    target: { tabId: tab.id },
-    files: ['style.css']
-  }).catch(err => console.error('CSS injection failed:', err));
+// Listen for messages from popup or floating panel
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  // Handle link scanning
+  if (message.action === "scanLink") {
+    const scanUrl = "http://127.0.0.1:5000/scan-link"; // Flask backend API
 
-  // Inject JS
-  chrome.scripting.executeScript({
-    target: { tabId: tab.id },
-    files: ['floatingPanel.js']
-  }).catch(err => console.error('JS injection failed:', err));
+    console.log("[ShieldBox] Received scanLink request:", message.data);
+
+    fetch(scanUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ url: message.data })
+    })
+    .then((res) => res.json())
+    .then((data) => {
+      console.log("[ShieldBox] Scan result received:", data);
+      sendResponse({ result: data });
+    })
+    .catch((err) => {
+      console.error("[ShieldBox] Error during scan:", err);
+      sendResponse({ error: "Scan failed" });
+    });
+
+    // Keep the message channel open for async response
+    return true;
+  }
+
+  // Add more actions here later (e.g., scanAutoEmail, saveHistory, etc.)
 });
