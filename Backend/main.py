@@ -1,96 +1,79 @@
+
 from flask import Flask, request, jsonify
 from flask_cors import CORS
+import joblib
+import numpy as np
+from feature_extractor import extract_features
 
+# --- Flask App Setup ---
 app = Flask(__name__)
 CORS(app)  # Allow extension to access API
 
-# --- Manual URL Scan ---
+# --- Load Trained URL Phishing Model ---
+print("Loading phishing model...")
+phishing_model_package = joblib.load("phishing_model.pkl")
+phishing_model = phishing_model_package["model"]
+scaler = phishing_model_package["scaler"]
+threshold = phishing_model_package["threshold"]
+print(f"Phishing model loaded. Threshold: {threshold}")
+
+# --- Load Trained Email Model (3-class: phishing, scam, safe) ---
+print("Loading email model...")
+email_model = joblib.load("email_model.pkl")
+email_vectorizer = joblib.load("email_vectorizer.pkl")
+email_label_encoder = joblib.load("email_label_encoder.pkl")
+print("Email model loaded.")
+
+# --- URL Scanner Route ---
 @app.route('/scan-link', methods=['POST'])
 def scan_link():
     data = request.get_json()
     url = data.get('url', '')
-    
-    # Basic detection logic
+
     if not url.startswith("http"):
         return jsonify({ "url": url, "status": "invalid", "reason": "Not a valid URL" })
 
-    if "phish" in url or "fake" in url:
-        result = "phishing"
-    else:
-        result = "safe"
+    try:
+        features = extract_features(url)
+        features_scaled = scaler.transform([features])
+        prob = phishing_model.predict_proba(features_scaled)[0][1]
+        is_phishing = int(prob >= threshold)
 
-    return jsonify({ "url": url, "status": result })
+        return jsonify({
+            "url": url,
+            "status": "phishing" if is_phishing else "safe",
+            "probability": round(float(prob), 4)
+        })
 
-# --- Manual/Auto Email Scan ---
+    except Exception as e:
+        return jsonify({ "url": url, "status": "error", "reason": str(e) })
+
+
+# --- Email Scanner Route (subject + body -> phishing/scam/safe) ---
 @app.route('/scan-email', methods=['POST'])
 def scan_email():
     data = request.get_json()
-    body = data.get('body', '').lower()
-    subject = data.get('subject', '').lower()
+    subject = data.get("subject", "")
+    body = data.get("body", "")
 
-    suspicious_phrases = ["verify your account", "login here", "reset your password"]
-    phishing_links = ["phish", "fake", "scam"]
+    if not subject and not body:
+        return jsonify({"error": "Missing subject and body"}), 400
 
-    found_links = [word for word in body.split() if word.startswith("http")]
-    suspicious = any(phrase in body for phrase in suspicious_phrases)
-    link_suspicious = any(any(p in link for p in phishing_links) for link in found_links)
+    try:
+        text = (subject + " " + body).lower()
+        vector = email_vectorizer.transform([text])
+        prediction = email_model.predict(vector)[0]
+        label = email_label_encoder.inverse_transform([prediction])[0]
 
-    if suspicious or link_suspicious:
         return jsonify({
-            "status": "phishing",
-            "reason": f"Suspicious content{' and links' if link_suspicious else ''} detected",
-            "links": found_links
+            "status": label,
+            "subject": subject,
+            "body": body
         })
-    elif found_links:
-        return jsonify({
-            "status": "safe",
-            "reason": "Links found but no suspicious patterns",
-            "links": found_links
-        })
-    else:
-        return jsonify({
-            "status": "safe",
-            "reason": "No links or threats found"
-        })
+    except Exception as e:
+        return jsonify({"error": "Model inference failed", "reason": str(e)}), 500
 
-if __name__ == '__main__':
-    app.run(debug=True)
-from flask import Flask, request, jsonify
-from flask_cors import CORS
 
-@app.route('/scan-email', methods=['POST'])
-def scan_email():
-    data = request.get_json()
-    body = data.get('body', '')
-    subject = data.get('subject', '')
-
-    # Simple rule-based detection
-    if "http://phishingsite.com" in body or "verify account" in body.lower():
-        return jsonify({
-            "status": "phishing",
-            "reason": "Suspicious link found in email body"
-        })
-    else:
-        return jsonify({
-            "status": "safe",
-            "reason": "No threats detected"
-        })
-from flask import Flask, request, jsonify
-from flask_cors import CORS
-
-app = Flask(__name__)
-CORS(app)  # Allow extension to access API
-
-@app.route('/scan-link', methods=['POST'])
-def scan_link():
-    data = request.get_json()
-    url = data.get('url', '')
-    if "phish" in url or "fake" in url:
-        result = "phishing"
-    else:
-        result = "safe"
-
-    return jsonify({ "url": url, "status": result })
-
+# --- Run App ---
 if __name__ == '__main__':
     app.run(debug=True)

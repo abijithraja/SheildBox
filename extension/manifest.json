@@ -4,7 +4,8 @@
   "version": "1.0",
   "description": "Injects Shield Box phishing alert panel",
   "action": {
-    "default_title": "Shield Box"
+    "default_title": "Shield Box",
+    "default_popup": "popup.html"
   },
   "permissions": [
     "scripting",
