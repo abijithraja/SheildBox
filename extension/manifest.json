@@ -26,7 +26,7 @@
     },
     {
       "matches": ["https://mail.google.com/*"],
-      "js": ["emailParser.js"],
+      "js": ["emailParser.js", "autoEmailScanner.js"],
       "run_at": "document_idle"
     }
   ],

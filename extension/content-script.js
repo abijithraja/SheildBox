@@ -1,3 +1,17 @@
+chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+  if (request.action === "getEmailContent") {
+    // Replace with actual content parsing logic
+    const email = {
+      subject: "Sample Subject",
+      sender: "test@example.com",
+      body: "This is the email content with a suspicious link: http://phishingsite.com"
+    };
+
+    // Or return the email you already parsed with MutationObserver
+    sendResponse(email);
+    return true;
+  }
+});
 // Bridge: Listen for window.postMessage from injected panel and relay to background
 window.addEventListener('message', (event) => {
   if (event.source !== window) return;
