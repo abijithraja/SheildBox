@@ -65,21 +65,6 @@ function extractAndScan(emailElement) {
   scanAutomatically(emailData);
 }
 
-function updateResultBox(message) {
-  const interval = setInterval(() => {
-    // Try both possible panel IDs for robustness
-    const panel = document.getElementById("shieldbox-panel") || document.getElementById("shieldbox-floating-panel");
-    if (panel && panel.shadowRoot) {
-      const resultBox = panel.shadowRoot.getElementById("auto-scan-result");
-      if (resultBox) {
-        resultBox.textContent = message;
-        console.log("[ShieldBox AutoScan] Result shown in result box:", message);
-        clearInterval(interval);
-      }
-    }
-  }, 500);
-}
-
 function scanAutomatically(emailData) {
   fetch("http://127.0.0.1:5000/scan-email", {
     method: "POST",
@@ -90,7 +75,6 @@ function scanAutomatically(emailData) {
     .then((result) => {
       const message = `🛡️ Status: ${result.status.toUpperCase()} (${result.reason})`;
       console.log("[ShieldBox AutoScan]", message);
-      updateResultBox(message);
       chrome.runtime.sendMessage({
         action: "displayAutoScanResult",
         result: message,
