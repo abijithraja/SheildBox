@@ -1,7 +1,19 @@
 chrome.storage.local.get("autoScan", (data) => {
   console.log("[ShieldBox] autoEmailScanner.js loaded");
   console.log("[ShieldBox] autoScan value:", data.autoScan);
-  if (data.autoScan) waitForEmailView();
+  autoScanEnabled = !!data.autoScan;
+  if (autoScanEnabled) waitForEmailView();
+});
+
+chrome.storage.onChanged.addListener((changes, area) => {
+  if (area === "local" && changes.autoScan) {
+    autoScanEnabled = !!changes.autoScan.newValue;
+    console.log("[ShieldBox] autoScan toggled:", autoScanEnabled);
+    if (autoScanEnabled) {
+      waitForEmailView();
+    }
+    // If toggled off, do nothing (observer will ignore)
+  }
 });
 
 let lastScannedId = null;
@@ -51,6 +63,10 @@ function waitForEmailView() {
 }
 
 function extractAndScan(emailElement) {
+  if (!autoScanEnabled) {
+    console.log("[ShieldBox AutoScan] Skipped: auto scan is disabled.");
+    return;
+  }
   const subject = document.querySelector('h2.hP')?.innerText || "";
   const sender = document.querySelector('.gD')?.innerText || "";
   const body = emailElement.innerText || "";
@@ -66,14 +82,16 @@ function extractAndScan(emailElement) {
 }
 
 function updateAutoScanResultBox(message) {
+  const timestamp = new Date().toLocaleTimeString();
+  const displayMessage = `${message} [${timestamp}]`;
   const interval = setInterval(() => {
     // Only update the auto-scan-result box, not manual scan boxes
     const panel = document.getElementById("shieldbox-panel") || document.getElementById("shieldbox-floating-panel");
     if (panel && panel.shadowRoot) {
       const resultBox = panel.shadowRoot.getElementById("auto-scan-result");
       if (resultBox) {
-        resultBox.textContent = message;
-        console.log("[ShieldBox AutoScan] Result shown in auto-scan-result box:", message);
+        resultBox.textContent = displayMessage;
+        console.log("[ShieldBox AutoScan] Result shown in auto-scan-result box:", displayMessage);
         clearInterval(interval);
       }
     }
