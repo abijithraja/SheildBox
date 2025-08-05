@@ -8,12 +8,12 @@ function initializeFloatingPanel(shadow, container) {
   const manualEmailResult = shadow.getElementById("manual-email-result");
   const autoScanResult = shadow.getElementById("auto-scan-result");
 
-  // ✅ Manual link scan
+  // Manual link scan
   if (scanBtn && urlInput && manualLinkResult) {
     scanBtn.addEventListener("click", () => {
       const url = urlInput.value.trim();
       if (!url) {
-        const msg = "⚠️ Please enter a URL.";
+        const msg = "Please enter a URL.";
         manualLinkResult.textContent = msg;
         console.log("[ShieldBox]", msg);
         return;
@@ -21,12 +21,13 @@ function initializeFloatingPanel(shadow, container) {
       // Basic URL format validation
       const urlPattern = /^(https?:\/\/)?([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}(\/.*)?$/;
       if (!urlPattern.test(url)) {
-        const msg = "⚠️ Please enter a valid URL.";
+        const msg = "Please enter a valid URL.";
         manualLinkResult.textContent = msg;
         console.log("[ShieldBox]", msg);
         return;
       }
-      manualLinkResult.textContent = "🔍 Scanning...";
+      manualLinkResult.textContent = "Scanning...";
+      manualLinkResult.className = "result-box scanning";
       console.log("[ShieldBox] Scanning URL:", url);
       const msg = { action: "scanLink", data: url };
       console.log("[ShieldBox] Sending message:", msg);
@@ -34,24 +35,38 @@ function initializeFloatingPanel(shadow, container) {
         console.log("[ShieldBox] Got response:", response);
         if (response?.result) {
           const status = response.result.status || "Unknown";
-          manualLinkResult.textContent = `🛡️ Status: ${status.toUpperCase()}`;
+          manualLinkResult.textContent = `Status: ${status.toUpperCase()}`;
+          // Apply CSS class based on status
+          if (status.toLowerCase() === "safe") {
+            manualLinkResult.className = "result-box safe";
+            console.log("[ShieldBox] Applied CSS class: safe");
+          } else if (status.toLowerCase() === "phishing") {
+            manualLinkResult.className = "result-box phishing";
+            console.log("[ShieldBox] Applied CSS class: phishing");
+          } else {
+            manualLinkResult.className = "result-box";
+            console.log("[ShieldBox] Applied CSS class: default");
+          }
         } else {
-          manualLinkResult.textContent = "❌ Scan failed. Try again.";
+          manualLinkResult.textContent = "Scan failed. Please try again.";
+          manualLinkResult.className = "result-box neutral";
           console.error("[ShieldBox] No response or error in response.");
         }
       });
     });
   }
 
-  // 📩 Email scan
+  // Email scan
   if (scanEmailBtn && manualEmailResult) {
     scanEmailBtn.addEventListener("click", () => {
       console.log("[ShieldBox] Manual email scan triggered.");
-      manualEmailResult.textContent = "🔍 Scanning emails...";
+      manualEmailResult.textContent = "Scanning email content...";
+      manualEmailResult.className = "result-box scanning";
       chrome.runtime.sendMessage({ action: "request_email_extraction" }, (response) => {
         if (!response || response.error) {
           console.error("[ShieldBox] Failed to extract email:", response?.error);
-          manualEmailResult.textContent = "❌ Could not extract email content.";
+          manualEmailResult.textContent = "Could not extract email content.";
+          manualEmailResult.className = "result-box neutral";
           return;
         }
         const emailData = response.email;
@@ -64,11 +79,23 @@ function initializeFloatingPanel(shadow, container) {
         })
           .then(res => res.json())
           .then(result => {
-            manualEmailResult.textContent = `🛡️ Status: ${result.status.toUpperCase()} (${result.reason})`;
+            manualEmailResult.textContent = `Status: ${result.status.toUpperCase()} (${result.reason})`;
+            // Apply CSS class based on status
+            if (result.status.toLowerCase() === "safe" || result.status.toLowerCase() === "legitimate") {
+              manualEmailResult.className = "result-box safe";
+              console.log("[ShieldBox] Applied CSS class: safe");
+            } else if (result.status.toLowerCase() === "fraudulent" || result.status.toLowerCase() === "phishing") {
+              manualEmailResult.className = "result-box fraudulent";
+              console.log("[ShieldBox] Applied CSS class: fraudulent"); 
+            } else {
+              manualEmailResult.className = "result-box";
+              console.log("[ShieldBox] Applied CSS class: default");
+            }
           })
           .catch(err => {
             console.error("Error sending email to backend:", err);
-            manualEmailResult.textContent = "❌ Error contacting server.";
+            manualEmailResult.textContent = "Error contacting server.";
+            manualEmailResult.className = "result-box neutral";
           });
       });
     });
@@ -82,6 +109,15 @@ function initializeFloatingPanel(shadow, container) {
       window.lastAutoScanResult = message.result;
       autoScanResult.textContent = message.result;
       console.log("[ShieldBox FloatingPanel] Auto-scan result updated:", message.result);
+
+      // Apply CSS class based on result status
+      if (message.result.toLowerCase().includes("safe") || message.result.toLowerCase().includes("legitimate")) {
+        autoScanResult.className = "result-box safe";
+      } else if (message.result.toLowerCase().includes("fraudulent") || message.result.toLowerCase().includes("phishing")) {
+        autoScanResult.className = "result-box fraudulent";
+      } else {
+        autoScanResult.className = "result-box neutral";
+      }
     }
   });
 
@@ -145,55 +181,6 @@ function initializeFloatingPanel(shadow, container) {
     autoScanResult.textContent = window.lastAutoScanResult;
     console.log("[ShieldBox FloatingPanel] Restored cached auto-scan-result after reinjection:", window.lastAutoScanResult);
   }
-
-  // Add dragging functionality
-  makeDraggable(container, shadow);
-}
-
-function makeDraggable(container, shadow) {
-  let isDragging = false;
-  let dragOffsetX = 0;
-  let dragOffsetY = 0;
-
-  const header = shadow.querySelector('.panel-header') || shadow.querySelector('.floating-container');
-  
-  if (header) {
-    header.style.cursor = 'move';
-    
-    header.addEventListener('mousedown', (e) => {
-      isDragging = true;
-      const rect = container.getBoundingClientRect();
-      dragOffsetX = e.clientX - rect.left;
-      dragOffsetY = e.clientY - rect.top;
-      header.style.cursor = 'grabbing';
-      e.preventDefault();
-    });
-
-    document.addEventListener('mousemove', (e) => {
-      if (isDragging) {
-        const newX = e.clientX - dragOffsetX;
-        const newY = e.clientY - dragOffsetY;
-        
-        // Keep within viewport bounds
-        const maxX = window.innerWidth - container.offsetWidth;
-        const maxY = window.innerHeight - container.offsetHeight;
-        
-        const clampedX = Math.max(0, Math.min(newX, maxX));
-        const clampedY = Math.max(0, Math.min(newY, maxY));
-        
-        container.style.left = clampedX + 'px';
-        container.style.top = clampedY + 'px';
-        container.style.right = 'auto'; // Override right positioning
-      }
-    });
-
-    document.addEventListener('mouseup', () => {
-      if (isDragging) {
-        isDragging = false;
-        header.style.cursor = 'move';
-      }
-    });
-  }
 }
 
 function injectFloatingPanel() {
@@ -215,7 +202,7 @@ function injectFloatingPanel() {
       const shadow = container.attachShadow({ mode: 'open' });
       shadow.innerHTML = html;
 
-      // ✅ Inject CSS with cache-busting
+      // Inject CSS with cache-busting
       const cssUrl = chrome.runtime.getURL('style.css') + '?v=' + Date.now();
       fetch(cssUrl)
         .then(res => res.text())

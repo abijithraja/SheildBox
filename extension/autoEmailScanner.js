@@ -1,24 +1,38 @@
-chrome.storage.local.get("autoScan", (data) => {
+let autoScanEnabled = true; // Default to enabled
+
+chrome.storage.sync.get("autoScan", (data) => {
   console.log("[ShieldBox] autoEmailScanner.js loaded");
   console.log("[ShieldBox] autoScan value:", data.autoScan);
-  autoScanEnabled = !!data.autoScan;
+  autoScanEnabled = data.autoScan !== false; // Default to true
   if (autoScanEnabled) waitForEmailView();
 });
 
 chrome.storage.onChanged.addListener((changes, area) => {
-  if (area === "local" && changes.autoScan) {
-    autoScanEnabled = !!changes.autoScan.newValue;
+  if (area === "sync" && changes.autoScan) {
+    autoScanEnabled = changes.autoScan.newValue !== false;
     console.log("[ShieldBox] autoScan toggled:", autoScanEnabled);
     if (autoScanEnabled) {
       waitForEmailView();
+    } else {
+      // Clear the auto scan result when disabled
+      updateAutoScanResultBox("Auto scan disabled");
+      chrome.runtime.sendMessage({
+        action: "displayAutoScanResult",
+        result: "Auto scan disabled"
+      });
     }
-    // If toggled off, do nothing (observer will ignore)
   }
 });
 
 let lastScannedId = null;
+let emailPreviouslyDetected = false;
 
 function waitForEmailView() {
+  if (!autoScanEnabled) {
+    console.log("[ShieldBox AutoScan] Auto scan is disabled. Not starting observer.");
+    return;
+  }
+  
   const body = document.body;
   if (!body) {
     console.warn("[ShieldBox AutoScan] <body> not found. Retrying...");
@@ -29,6 +43,13 @@ function waitForEmailView() {
   console.log("[ShieldBox AutoScan] Observing entire body for debugging...");
 
   const observer = new MutationObserver(() => {
+    // Check if auto scan is still enabled
+    if (!autoScanEnabled) {
+      console.log("[ShieldBox AutoScan] Auto scan disabled, stopping observer.");
+      observer.disconnect();
+      return;
+    }
+    
     // Wait 200ms for DOM to settle, then check again
     setTimeout(() => {
       const emailElement = document.querySelector("div[role='main'] .a3s"); // modern Gmail email body
@@ -36,8 +57,21 @@ function waitForEmailView() {
         const id = emailElement.innerText.slice(0, 100); // crude but unique
         if (id !== lastScannedId) {
           lastScannedId = id;
+          emailPreviouslyDetected = true;
           console.log("[ShieldBox AutoScan] 📩 New email detected. Scanning...");
           extractAndScan(emailElement);
+        }
+      } else {
+        // No email element found
+        if (emailPreviouslyDetected) {
+          // Only update if previously an email was detected
+          emailPreviouslyDetected = false;
+          lastScannedId = null;
+          updateAutoScanResultBox("No mail detected");
+          chrome.runtime.sendMessage({
+            action: "displayAutoScanResult",
+            result: "No mail detected"
+          });
         }
       }
     }, 200); // delay to let Gmail render inner content
@@ -100,7 +134,7 @@ function updateAutoScanResultBox(message) {
 
 // In scanAutomatically, call updateAutoScanResultBox ONLY for auto scan
 function scanAutomatically(emailData) {
-  fetch("http://127.0.0.1:5000/scan-email", {
+  fetch("http://127.0.0.1:5000/scan-email-auto", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(emailData),
