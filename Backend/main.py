@@ -5,10 +5,27 @@ import joblib
 import numpy as np
 from feature_extractor import extract_features
 from auto_email_model_loader import load_auto_email_model
+import requests
 
 # --- Flask App Setup ---
 app = Flask(__name__)
 CORS(app)  # Allow extension to access API
+
+# --- Integration Function for MQTT Service ---
+def send_to_mqtt_service(label, topic="shieldbox/email_scan", iot_enabled=True):
+    """Send classification result to dedicated MQTT service"""
+    if not iot_enabled:
+        print("🔇 IoT disabled - MQTT message not sent")
+        return
+    
+    try:
+        response = requests.post("http://127.0.0.1:5001/mqtt-publish", json={
+            "message": label,
+            "topic": topic
+        })
+        print("📡 Sent to MQTT Service:", response.json())
+    except Exception as e:
+        print("❌ Failed to send to MQTT Service:", e)
 
 # --- Load Trained URL Phishing Model ---
 print("Loading phishing model...")
@@ -35,6 +52,7 @@ def scan_email_auto():
     data = request.get_json()
     subject = data.get("subject", "")
     body = data.get("body", "")
+    iot_enabled = data.get("iot_enabled", True)  # Default to True for backward compatibility
 
     if not subject and not body:
         return jsonify({"error": "Missing subject and body"}), 400
@@ -108,6 +126,9 @@ def scan_email_auto():
         else:
             reason = "Model classification (legitimate source)"
         
+        # Publish classification result to ESP32 via MQTT Service
+        send_to_mqtt_service(label, "shieldbox/email_scan", iot_enabled)
+        
         return jsonify({
             "status": label,
             "reason": reason,
@@ -122,6 +143,7 @@ def scan_email_auto():
 def scan_link():
     data = request.get_json()
     url = data.get('url', '')
+    iot_enabled = data.get("iot_enabled", True)  # Default to True for backward compatibility
 
     if not url.startswith("http"):
         return jsonify({ "url": url, "status": "invalid", "reason": "Not a valid URL" })
@@ -131,10 +153,16 @@ def scan_link():
         features_scaled = scaler.transform([features])
         prob = phishing_model.predict_proba(features_scaled)[0][1]
         is_phishing = int(prob >= threshold)
+        
+        # Determine classification result
+        classification = "phishing" if is_phishing else "safe"
+        
+        # Publish classification result to ESP32 via MQTT Service
+        send_to_mqtt_service(classification, "shieldbox/url_scan", iot_enabled)
 
         return jsonify({
             "url": url,
-            "status": "phishing" if is_phishing else "safe",
+            "status": classification,
             "probability": round(float(prob), 4)
         })
 
@@ -148,6 +176,7 @@ def scan_email():
     data = request.get_json()
     subject = data.get("subject", "")
     body = data.get("body", "")
+    iot_enabled = data.get("iot_enabled", True)  # Default to True for backward compatibility
 
     if not subject and not body:
         return jsonify({"error": "Missing subject and body"}), 400
@@ -205,6 +234,9 @@ def scan_email():
         else:
             reason = "Model classification (legitimate source)"
 
+        # Publish classification result to ESP32 via MQTT Service
+        send_to_mqtt_service(label, "shieldbox/email_scan", iot_enabled)
+
         return jsonify({
             "status": label,
             "reason": reason,
@@ -213,6 +245,38 @@ def scan_email():
         })
     except Exception as e:
         return jsonify({"error": "Model inference failed", "reason": str(e)}), 500
+
+# --- ESP32 Alert Forwarding Route (for extension proxy) ---
+@app.route('/forward-alert', methods=['GET'])
+def forward_alert():
+    alert_type = request.args.get("type", "safe")
+    iot_enabled = request.args.get("iot_enabled", "true").lower() == "true"  # Default to True
+    
+    try:
+        # Publish to ESP32 via MQTT Service
+        send_to_mqtt_service(alert_type, "shieldbox/extension_alert", iot_enabled)
+        
+        return jsonify({"status": "sent", "type": alert_type}), 200
+    except Exception as e:
+        print(f"❌ MQTT forward failed: {e}")
+        return jsonify({"error": str(e)}), 500
+
+# --- MQTT Publish Route (for extension status messages) ---
+@app.route('/mqtt-publish', methods=['POST'])
+def mqtt_publish():
+    try:
+        data = request.get_json()
+        message = data.get("message", "safe")
+        topic = data.get("topic", "shieldbox/extension_alert")
+        iot_enabled = data.get("iot_enabled", True)  # Default to True for backward compatibility
+        
+        # Publish to ESP32 via MQTT Service
+        send_to_mqtt_service(message, topic, iot_enabled)
+        
+        return jsonify({"status": "published", "message": message, "topic": topic}), 200
+    except Exception as e:
+        print(f"❌ MQTT publish failed: {e}")
+        return jsonify({"error": str(e)}), 500
 
 
 # --- Run App ---
