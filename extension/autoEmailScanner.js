@@ -1,5 +1,26 @@
 let autoScanEnabled = true; // Default to enabled
 let isExtensionValid = true; // Track extension context validity
+let lastScannedId = null;
+let emailPreviouslyDetected = false;
+let scanDebounceTimer = null; // Debounce timer for performance
+
+// === ULTRA-FAST PERFORMANCE: Debounced scanning ===
+function debouncedScan(emailElement, delay = 300) {
+  if (scanDebounceTimer) {
+    clearTimeout(scanDebounceTimer);
+  }
+  
+  scanDebounceTimer = setTimeout(() => {
+    extractAndScan(emailElement);
+  }, delay);
+}
+
+// === PERFORMANCE: Faster email content hashing ===
+function quickEmailHash(emailElement) {
+  const text = emailElement.textContent || "";
+  // Use first 100 chars + last 50 chars + length for fast unique ID
+  return text.substring(0, 100) + text.substring(text.length - 50) + text.length;
+}
 
 // Check if extension context is still valid
 function checkExtensionContext() {
@@ -108,9 +129,6 @@ if (checkExtensionContext()) {
   });
 }
 
-let lastScannedId = null;
-let emailPreviouslyDetected = false;
-
 function waitForEmailView() {
   if (!autoScanEnabled || !checkExtensionContext()) {
     console.log("[ShieldBox AutoScan] Auto scan is disabled or context invalid. Not starting observer.");
@@ -138,36 +156,34 @@ function waitForEmailView() {
       return;
     }
     
-    // Wait 200ms for DOM to settle, then check again
-    setTimeout(() => {
-      if (!checkExtensionContext()) {
-        observer.disconnect();
-        return;
+    // === ULTRA-FAST: Immediate check with debounced scanning ===
+    if (!checkExtensionContext()) {
+      observer.disconnect();
+      return;
+    }
+    
+    const emailElement = document.querySelector("div[role='main'] .a3s"); // modern Gmail email body
+    if (emailElement) {
+      const emailHash = quickEmailHash(emailElement); // Fast hash
+      if (emailHash !== lastScannedId) {
+        lastScannedId = emailHash;
+        emailPreviouslyDetected = true;
+        console.log("[ShieldBox AutoScan] 📩 New email detected. Debounced scanning...");
+        debouncedScan(emailElement, 200); // Fast debounced scan
       }
-      
-      const emailElement = document.querySelector("div[role='main'] .a3s"); // modern Gmail email body
-      if (emailElement) {
-        const id = emailElement.innerText.slice(0, 100); // crude but unique
-        if (id !== lastScannedId) {
-          lastScannedId = id;
-          emailPreviouslyDetected = true;
-          console.log("[ShieldBox AutoScan] 📩 New email detected. Scanning...");
-          extractAndScan(emailElement);
-        }
-      } else {
-        // No email element found
-        if (emailPreviouslyDetected) {
-          // Only update if previously an email was detected
-          emailPreviouslyDetected = false;
-          lastScannedId = null;
-          updateAutoScanResultBox("No mail detected");
-          safeSendMessage({
-            action: "displayAutoScanResult",
-            result: "No mail detected"
-          });
-        }
+    } else {
+      // No email element found
+      if (emailPreviouslyDetected) {
+        // Only update if previously an email was detected
+        emailPreviouslyDetected = false;
+        lastScannedId = null;
+        updateAutoScanResultBox("No mail detected");
+        safeSendMessage({
+          action: "displayAutoScanResult",
+          result: "No mail detected"
+        });
       }
-    }, 200); // delay to let Gmail render inner content
+    }
   });
 
   observer.observe(body, {
@@ -237,19 +253,43 @@ function scanAutomatically(emailData) {
     return;
   }
   
+  // === ULTRA-FAST FETCH with minimal data and longer timeout ===
+  const startTime = performance.now();
+  
+  // Show scanning indicator
+  updateAutoScanResultBox("🔄 Scanning...");
+  
   fetch("http://127.0.0.1:5000/scan-email-auto", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(emailData),
+    body: JSON.stringify({
+      subject: emailData.subject,
+      body: emailData.body.substring(0, 2000) // Limit body size for speed
+    }),
+    signal: AbortSignal.timeout(15000) // Increased to 15 seconds for better reliability
   })
-    .then((res) => res.json())
+    .then((res) => {
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      return res.json();
+    })
     .then((result) => {
+      const scanTime = performance.now() - startTime;
+      
       if (!checkExtensionContext()) {
         console.warn("[ShieldBox AutoScan] Context invalid during result processing");
         return;
       }
       
-      const message = `🛡️ Status: ${result.status.toUpperCase()} (${result.reason})`;
+      // Enhanced message with performance data if available
+      let message = `🛡️ Status: ${result.status.toUpperCase()} (${result.reason})`;
+      
+      if (result.performance) {
+        message += ` [${Math.round(scanTime)}ms total, ${result.performance.prediction_time}ms ML]`;
+        console.log(`[ShieldBox AutoScan] Performance: Total=${Math.round(scanTime)}ms, ML=${result.performance.prediction_time}ms, MQTT=${result.performance.mqtt_time}ms`);
+      } else {
+        message += ` [${Math.round(scanTime)}ms]`;
+      }
+      
       console.log("[ShieldBox AutoScan]", message);
       updateAutoScanResultBox(message);
       
@@ -266,7 +306,27 @@ function scanAutomatically(emailData) {
       });
     })
     .catch((err) => {
-      console.error("[ShieldBox AutoScan] Error:", err);
+      const scanTime = performance.now() - startTime;
+      
+      // Better error handling for different error types
+      let errorMessage = "❌ Scan failed";
+      
+      if (err.name === 'TimeoutError' || err.name === 'AbortError') {
+        if (scanTime > 14000) { // Near the 15s timeout
+          errorMessage = "⏱️ Scan timeout (>15s) - check backend";
+        } else {
+          errorMessage = "⏱️ Scan timeout - server slow";
+        }
+        console.error(`[ShieldBox AutoScan] Timeout after ${Math.round(scanTime)}ms`);
+      } else if (err.message && err.message.includes("Failed to fetch")) {
+        errorMessage = "🔌 Connection failed - backend offline?";
+        console.error(`[ShieldBox AutoScan] Connection error after ${Math.round(scanTime)}ms:`, err);
+      } else {
+        console.error(`[ShieldBox AutoScan] Error after ${Math.round(scanTime)}ms:`, err);
+      }
+      
+      updateAutoScanResultBox(`${errorMessage} [${Math.round(scanTime)}ms]`);
+      
       if (err.message && err.message.includes("Extension context invalidated")) {
         isExtensionValid = false;
         console.warn("[ShieldBox AutoScan] Extension context invalidated - stopping operations");
