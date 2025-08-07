@@ -1,0 +1,1816 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ShieldBox UI Design Comparison</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .comparison-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 20px;
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+
+        .ui-variant {
+            background: white;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .ui-variant:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+        }
+
+        .variant-header {
+            padding: 15px 20px;
+            font-weight: 600;
+            font-size: 1.1rem;
+            color: white;
+            text-align: center;
+        }
+
+        .variant-content {
+            padding: 20px;
+            min-height: 400px;
+        }
+
+        /* Original ShieldBox Style - Current Floating Panel */
+        .original .variant-header {
+            background: linear-gradient(120deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .original .container {
+            width: 270px;
+            padding: 14px 16px 12px 16px;
+            border-radius: 16px;
+            background: linear-gradient(120deg, rgba(255,255,255,0.13) 60%, rgba(200,220,255,0.07) 100%);
+            box-shadow: 0 12px 40px 0 rgba(31, 38, 135, 0.18), 0 2px 12px rgba(27,31,35,0.13);
+            color: #24292f;
+            transition: box-shadow 0.18s, background 0.18s;
+            box-sizing: border-box;
+            border: 2px solid rgba(255,255,255,0.22);
+            backdrop-filter: blur(28px) saturate(220%);
+            -webkit-backdrop-filter: blur(28px) saturate(220%);
+        }
+
+        .original .card {
+            background: rgba(255,255,255,0.92);
+            color: inherit;
+            border: 1px solid #eaecef;
+            box-shadow: 0 1px 4px rgba(27,31,35,0.04);
+            padding: 10px 12px 10px 12px;
+            border-radius: 10px;
+            margin-bottom: 12px;
+            transition: background 0.18s, color 0.18s;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .original .card-header {
+            padding: 8px 12px;
+            background: #f6f8fa;
+            color: #24292f;
+            font-weight: 700;
+            font-size: 15px;
+            border-radius: 8px 8px 0 0;
+            margin: 0 -12px;
+            margin-top: -10px;
+            margin-bottom: 10px;
+            border-bottom: 1px solid #d0d7de;
+            letter-spacing: 0.01em;
+            transition: background 0.18s, color 0.18s;
+        }
+
+        .original input {
+            width: 100%;
+            padding: 6px 8px;
+            font-size: 13px;
+            border-radius: 3px;
+            border: 1px solid #d0d7e2;
+            outline: none;
+            background: #fff;
+            margin-bottom: 7px;
+            transition: border 0.18s;
+            box-sizing: border-box;
+            display: block;
+            font-family: inherit;
+        }
+
+        .original input:focus {
+            border: 1.2px solid #1976d2;
+            background: rgba(230,240,255,0.22);
+        }
+
+        .original button {
+            width: 100%;
+            padding: 6px 0;
+            border: none;
+            border-radius: 7px;
+            background: #1976d2;
+            color: #fff;
+            font-weight: 600;
+            font-size: 13px;
+            letter-spacing: 0.01em;
+            cursor: pointer;
+            transition: background 0.18s, box-shadow 0.18s, transform 0.18s;
+            font-family: inherit;
+            box-shadow: 0 2px 8px 0 rgba(25, 118, 210, 0.13);
+        }
+
+        .original button:hover {
+            background: #1565c0;
+            transform: translateY(-2px) scale(1.03);
+            box-shadow: 0 4px 16px 0 rgba(25, 118, 210, 0.18);
+        }
+
+        .original .result-box {
+            margin-top: 7px;
+            padding: 7px 8px;
+            border-radius: 3px;
+            background: #f8f9fa;
+            font-size: 13px;
+            border: 1px solid #e0e0e0;
+            font-family: inherit;
+            font-weight: 500;
+            letter-spacing: 0.01em;
+            color: #222;
+        }
+
+        /* Original ShieldBox Dark Mode */
+        .original-dark .variant-header {
+            background: linear-gradient(120deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .original-dark .container {
+            width: 100%;
+            padding: 14px 16px 12px 16px;
+            border-radius: 16px;
+            background: linear-gradient(120deg, rgba(0,0,0,0.88) 60%, rgba(20,20,28,0.72) 100%);
+            box-shadow: 0 16px 48px 0 rgba(0,0,0,0.38);
+            border: 2px solid rgba(60, 70, 100, 0.22);
+            backdrop-filter: blur(32px) saturate(240%);
+        }
+
+        .original-dark .card {
+            background: rgba(32,34,40,0.82);
+            border: 1px solid #30363d;
+            box-shadow: 0 1px 4px rgba(27,31,35,0.13);
+            padding: 12px;
+            border-radius: 10px;
+            margin-bottom: 12px;
+        }
+
+        .original-dark .card-header {
+            font-weight: 700;
+            font-size: 14px;
+            margin-bottom: 10px;
+            color: #f0f6fc;
+        }
+
+        .original-dark input {
+            width: 100%;
+            padding: 8px 10px;
+            border: 1px solid #30363d;
+            border-radius: 6px;
+            margin-bottom: 8px;
+            font-size: 13px;
+            background: #21262d;
+            color: #f0f6fc;
+        }
+
+        .original-dark button {
+            width: 100%;
+            padding: 8px;
+            background: #1976d2;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-bottom: 8px;
+            border: 1.5px solid rgba(60, 70, 100, 0.22);
+        }
+
+        .original-dark .result-box {
+            padding: 8px;
+            background: rgba(70, 70, 71, 0.92);
+            border: 1.2px solid rgba(60, 70, 100, 0.32);
+            border-radius: 4px;
+            font-size: 12px;
+            color: #f0f6fc;
+        }
+
+        /* iOS Style */
+        .ios .variant-header {
+            background: linear-gradient(135deg, #007AFF 0%, #5856D6 100%);
+        }
+
+        .ios .container {
+            background: rgba(255,255,255,0.95);
+            border-radius: 20px;
+            padding: 20px;
+            backdrop-filter: blur(20px);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+        }
+
+        .ios .card {
+            background: rgba(255,255,255,0.8);
+            border-radius: 16px;
+            padding: 16px;
+            margin-bottom: 16px;
+            border: none;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        }
+
+        .ios .card-header {
+            font-weight: 600;
+            font-size: 17px;
+            color: #1c1c1e;
+            margin-bottom: 12px;
+        }
+
+        .ios input {
+            width: 100%;
+            padding: 12px 16px;
+            border: none;
+            border-radius: 12px;
+            background: rgba(120,120,128,0.12);
+            font-size: 16px;
+            margin-bottom: 12px;
+        }
+
+        .ios button {
+            width: 100%;
+            padding: 14px;
+            background: #007AFF;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 12px;
+        }
+
+        .ios .result-box {
+            padding: 12px;
+            background: rgba(120,120,128,0.08);
+            border-radius: 12px;
+            font-size: 14px;
+            color: #3c3c43;
+        }
+
+        /* iOS Dark Mode */
+        .ios-dark .variant-header {
+            background: linear-gradient(135deg, #0A84FF 0%, #5E5CE6 100%);
+        }
+
+        .ios-dark .container {
+            background: rgba(28,28,30,0.95);
+            border-radius: 20px;
+            padding: 20px;
+            backdrop-filter: blur(20px);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+        }
+
+        .ios-dark .card {
+            background: rgba(44,44,46,0.8);
+            border-radius: 16px;
+            padding: 16px;
+            margin-bottom: 16px;
+            border: none;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+        }
+
+        .ios-dark .card-header {
+            font-weight: 600;
+            font-size: 17px;
+            color: #ffffff;
+            margin-bottom: 12px;
+        }
+
+        .ios-dark input {
+            width: 100%;
+            padding: 12px 16px;
+            border: none;
+            border-radius: 12px;
+            background: rgba(120,120,128,0.24);
+            font-size: 16px;
+            margin-bottom: 12px;
+            color: #ffffff;
+        }
+
+        .ios-dark button {
+            width: 100%;
+            padding: 14px;
+            background: #0A84FF;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 12px;
+        }
+
+        .ios-dark .result-box {
+            padding: 12px;
+            background: rgba(120,120,128,0.16);
+            border-radius: 12px;
+            font-size: 14px;
+            color: #ebebf5;
+        }
+
+        /* Android Material Design */
+        .android .variant-header {
+            background: linear-gradient(135deg, #4285F4 0%, #34A853 100%);
+        }
+
+        .android .container {
+            background: white;
+            border-radius: 12px;
+            padding: 16px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+        }
+
+        .android .card {
+            background: white;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 16px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.12);
+        }
+
+        .android .card-header {
+            font-weight: 500;
+            font-size: 16px;
+            color: #212121;
+            margin-bottom: 16px;
+        }
+
+        .android input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid #E0E0E0;
+            border-radius: 4px;
+            font-size: 16px;
+            margin-bottom: 16px;
+            transition: border-color 0.2s;
+        }
+
+        .android input:focus {
+            border-color: #4285F4;
+            outline: none;
+        }
+
+        .android button {
+            width: 100%;
+            padding: 12px 24px;
+            background: #4285F4;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 14px;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 16px;
+        }
+
+        .android .result-box {
+            padding: 12px;
+            background: #F5F5F5;
+            border-radius: 4px;
+            font-size: 14px;
+            color: #757575;
+        }
+
+        /* Android Dark Mode */
+        .android-dark .variant-header {
+            background: linear-gradient(135deg, #4285F4 0%, #34A853 100%);
+        }
+
+        .android-dark .container {
+            background: #121212;
+            border-radius: 12px;
+            padding: 16px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+        }
+
+        .android-dark .card {
+            background: #1F1F1F;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 16px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .android-dark .card-header {
+            font-weight: 500;
+            font-size: 16px;
+            color: #FFFFFF;
+            margin-bottom: 16px;
+        }
+
+        .android-dark input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid #333333;
+            border-radius: 4px;
+            font-size: 16px;
+            margin-bottom: 16px;
+            transition: border-color 0.2s;
+            background: #2C2C2C;
+            color: #FFFFFF;
+        }
+
+        .android-dark input:focus {
+            border-color: #4285F4;
+            outline: none;
+        }
+
+        .android-dark button {
+            width: 100%;
+            padding: 12px 24px;
+            background: #4285F4;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 14px;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 16px;
+        }
+
+        .android-dark .result-box {
+            padding: 12px;
+            background: #2C2C2C;
+            border-radius: 4px;
+            font-size: 14px;
+            color: #CCCCCC;
+        }
+
+        /* Microsoft Fluent Design */
+        .fluent .variant-header {
+            background: linear-gradient(135deg, #0078D4 0%, #106EBE 100%);
+        }
+
+        .fluent .container {
+            background: rgba(255,255,255,0.9);
+            border-radius: 8px;
+            padding: 20px;
+            border: 1px solid rgba(0,0,0,0.1);
+            box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+        }
+
+        .fluent .card {
+            background: rgba(255,255,255,0.8);
+            border: 1px solid rgba(0,0,0,0.08);
+            border-radius: 4px;
+            padding: 16px;
+            margin-bottom: 16px;
+        }
+
+        .fluent .card-header {
+            font-weight: 600;
+            font-size: 14px;
+            color: #323130;
+            margin-bottom: 12px;
+        }
+
+        .fluent input {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #8A8886;
+            border-radius: 2px;
+            font-size: 14px;
+            margin-bottom: 12px;
+        }
+
+        .fluent input:focus {
+            border-color: #0078D4;
+            outline: none;
+        }
+
+        .fluent button {
+            width: 100%;
+            padding: 10px 16px;
+            background: #0078D4;
+            color: white;
+            border: none;
+            border-radius: 2px;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 12px;
+        }
+
+        .fluent .result-box {
+            padding: 12px;
+            background: #F3F2F1;
+            border: 1px solid #EDEBE9;
+            border-radius: 2px;
+            font-size: 12px;
+            color: #605E5C;
+        }
+
+        /* Microsoft Fluent Dark Mode */
+        .fluent-dark .variant-header {
+            background: linear-gradient(135deg, #0078D4 0%, #106EBE 100%);
+        }
+
+        .fluent-dark .container {
+            background: rgba(32,31,30,0.9);
+            border-radius: 8px;
+            padding: 20px;
+            border: 1px solid rgba(255,255,255,0.1);
+            box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+        }
+
+        .fluent-dark .card {
+            background: rgba(41,40,39,0.8);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 4px;
+            padding: 16px;
+            margin-bottom: 16px;
+        }
+
+        .fluent-dark .card-header {
+            font-weight: 600;
+            font-size: 14px;
+            color: #FFFFFF;
+            margin-bottom: 12px;
+        }
+
+        .fluent-dark input {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #605E5C;
+            border-radius: 2px;
+            font-size: 14px;
+            margin-bottom: 12px;
+            background: #292827;
+            color: #FFFFFF;
+        }
+
+        .fluent-dark input:focus {
+            border-color: #0078D4;
+            outline: none;
+        }
+
+        .fluent-dark button {
+            width: 100%;
+            padding: 10px 16px;
+            background: #0078D4;
+            color: white;
+            border: none;
+            border-radius: 2px;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 12px;
+        }
+
+        .fluent-dark .result-box {
+            padding: 12px;
+            background: #292827;
+            border: 1px solid #3B3A39;
+            border-radius: 2px;
+            font-size: 12px;
+            color: #F3F2F1;
+        }
+
+        /* GitHub Style */
+        .github .variant-header {
+            background: linear-gradient(135deg, #24292e 0%, #586069 100%);
+        }
+
+        .github .container {
+            background: #ffffff;
+            border: 1px solid #e1e4e8;
+            border-radius: 6px;
+            padding: 16px;
+            box-shadow: 0 1px 3px rgba(27,31,35,0.12);
+        }
+
+        .github .card {
+            background: #f6f8fa;
+            border: 1px solid #e1e4e8;
+            border-radius: 6px;
+            padding: 16px;
+            margin-bottom: 16px;
+        }
+
+        .github .card-header {
+            font-weight: 600;
+            font-size: 14px;
+            color: #24292e;
+            margin-bottom: 12px;
+        }
+
+        .github input {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #e1e4e8;
+            border-radius: 6px;
+            font-size: 14px;
+            margin-bottom: 12px;
+            background: #ffffff;
+        }
+
+        .github input:focus {
+            border-color: #0366d6;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(3,102,214,0.3);
+        }
+
+        .github button {
+            width: 100%;
+            padding: 8px 16px;
+            background: #28a745;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 12px;
+        }
+
+        .github .result-box {
+            padding: 12px;
+            background: #fff;
+            border: 1px solid #e1e4e8;
+            border-radius: 6px;
+            font-size: 12px;
+            color: #586069;
+        }
+
+        /* GitHub Dark Mode */
+        .github-dark .variant-header {
+            background: linear-gradient(135deg, #0d1117 0%, #21262d 100%);
+        }
+
+        .github-dark .container {
+            background: #0d1117;
+            border: 1px solid #30363d;
+            border-radius: 6px;
+            padding: 16px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+        }
+
+        .github-dark .card {
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 6px;
+            padding: 16px;
+            margin-bottom: 16px;
+        }
+
+        .github-dark .card-header {
+            font-weight: 600;
+            font-size: 14px;
+            color: #f0f6fc;
+            margin-bottom: 12px;
+        }
+
+        .github-dark input {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #30363d;
+            border-radius: 6px;
+            font-size: 14px;
+            margin-bottom: 12px;
+            background: #21262d;
+            color: #f0f6fc;
+        }
+
+        .github-dark input:focus {
+            border-color: #58a6ff;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(88,166,255,0.3);
+        }
+
+        .github-dark button {
+            width: 100%;
+            padding: 8px 16px;
+            background: #238636;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 12px;
+        }
+
+        .github-dark .result-box {
+            padding: 12px;
+            background: #21262d;
+            border: 1px solid #30363d;
+            border-radius: 6px;
+            font-size: 12px;
+            color: #8b949e;
+        }
+
+        /* Discord Style */
+        .discord .variant-header {
+            background: linear-gradient(135deg, #5865F2 0%, #7289DA 100%);
+        }
+
+        .discord .container {
+            background: #36393f;
+            border-radius: 8px;
+            padding: 16px;
+            color: #dcddde;
+        }
+
+        .discord .card {
+            background: #40444b;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 16px;
+            border: none;
+        }
+
+        .discord .card-header {
+            font-weight: 600;
+            font-size: 16px;
+            color: #ffffff;
+            margin-bottom: 12px;
+        }
+
+        .discord input {
+            width: 100%;
+            padding: 10px 12px;
+            border: none;
+            border-radius: 4px;
+            background: #202225;
+            color: #dcddde;
+            font-size: 14px;
+            margin-bottom: 12px;
+        }
+
+        .discord button {
+            width: 100%;
+            padding: 10px 16px;
+            background: #5865F2;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 12px;
+        }
+
+        .discord .result-box {
+            padding: 12px;
+            background: #2f3136;
+            border-radius: 4px;
+            font-size: 13px;
+            color: #b9bbbe;
+        }
+
+        /* Netflix Dark Mode */
+        .netflix .variant-header {
+            background: linear-gradient(135deg, #E50914 0%, #B20710 100%);
+        }
+
+        .netflix .container {
+            background: #141414;
+            border-radius: 4px;
+            padding: 16px;
+            color: #ffffff;
+        }
+
+        .netflix .card {
+            background: #222222;
+            border-radius: 4px;
+            padding: 16px;
+            margin-bottom: 16px;
+            border: 1px solid #333333;
+        }
+
+        .netflix .card-header {
+            font-weight: 700;
+            font-size: 16px;
+            color: #ffffff;
+            margin-bottom: 12px;
+        }
+
+        .netflix input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid #333333;
+            border-radius: 2px;
+            background: #333333;
+            color: #ffffff;
+            font-size: 14px;
+            margin-bottom: 12px;
+        }
+
+        .netflix input:focus {
+            border-color: #E50914;
+            outline: none;
+        }
+
+        .netflix button {
+            width: 100%;
+            padding: 12px 16px;
+            background: #E50914;
+            color: white;
+            border: none;
+            border-radius: 2px;
+            font-size: 14px;
+            font-weight: 700;
+            margin-bottom: 12px;
+            text-transform: uppercase;
+        }
+
+        .netflix .result-box {
+            padding: 12px;
+            background: #333333;
+            border-radius: 2px;
+            font-size: 13px;
+            color: #B3B3B3;
+        }
+
+        /* Spotify Dark Mode */
+        .spotify .variant-header {
+            background: linear-gradient(135deg, #1DB954 0%, #1ED760 100%);
+        }
+
+        .spotify .container {
+            background: #121212;
+            border-radius: 8px;
+            padding: 16px;
+            color: #ffffff;
+        }
+
+        .spotify .card {
+            background: #181818;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 16px;
+            border: none;
+        }
+
+        .spotify .card-header {
+            font-weight: 700;
+            font-size: 16px;
+            color: #ffffff;
+            margin-bottom: 12px;
+        }
+
+        .spotify input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid #727272;
+            border-radius: 500px;
+            background: #2A2A2A;
+            color: #ffffff;
+            font-size: 14px;
+            margin-bottom: 12px;
+        }
+
+        .spotify input:focus {
+            border-color: #1DB954;
+            outline: none;
+        }
+
+        .spotify button {
+            width: 100%;
+            padding: 12px 16px;
+            background: #1DB954;
+            color: #000000;
+            border: none;
+            border-radius: 500px;
+            font-size: 14px;
+            font-weight: 700;
+            margin-bottom: 12px;
+        }
+
+        .spotify .result-box {
+            padding: 12px;
+            background: #2A2A2A;
+            border-radius: 8px;
+            font-size: 13px;
+            color: #B3B3B3;
+        }
+
+        /* Slack Dark Mode */
+        .slack .variant-header {
+            background: linear-gradient(135deg, #4A154B 0%, #350D36 100%);
+        }
+
+        .slack .container {
+            background: #1A1D29;
+            border-radius: 8px;
+            padding: 16px;
+            color: #D1D2D3;
+        }
+
+        .slack .card {
+            background: #232529;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 16px;
+            border: 1px solid #2F3349;
+        }
+
+        .slack .card-header {
+            font-weight: 900;
+            font-size: 15px;
+            color: #ffffff;
+            margin-bottom: 12px;
+        }
+
+        .slack input {
+            width: 100%;
+            padding: 11px 12px;
+            border: 1px solid #3F4049;
+            border-radius: 6px;
+            background: #222529;
+            color: #D1D2D3;
+            font-size: 14px;
+            margin-bottom: 12px;
+        }
+
+        .slack input:focus {
+            border-color: #007A5A;
+            outline: none;
+        }
+
+        .slack button {
+            width: 100%;
+            padding: 11px 16px;
+            background: #007A5A;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 700;
+            margin-bottom: 12px;
+        }
+
+        .slack .result-box {
+            padding: 12px;
+            background: #222529;
+            border-radius: 6px;
+            font-size: 13px;
+            color: #9CA3AF;
+        }
+
+        /* Telegram Dark Mode */
+        .telegram .variant-header {
+            background: linear-gradient(135deg, #0088CC 0%, #006BB3 100%);
+        }
+
+        .telegram .container {
+            background: #17212B;
+            border-radius: 12px;
+            padding: 16px;
+            color: #ffffff;
+        }
+
+        .telegram .card {
+            background: #1E2832;
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 16px;
+            border: none;
+        }
+
+        .telegram .card-header {
+            font-weight: 500;
+            font-size: 16px;
+            color: #ffffff;
+            margin-bottom: 12px;
+        }
+
+        .telegram input {
+            width: 100%;
+            padding: 12px 16px;
+            border: none;
+            border-radius: 12px;
+            background: #232E3C;
+            color: #ffffff;
+            font-size: 14px;
+            margin-bottom: 12px;
+        }
+
+        .telegram button {
+            width: 100%;
+            padding: 12px 16px;
+            background: #0088CC;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 12px;
+        }
+
+        .telegram .result-box {
+            padding: 12px;
+            background: #232E3C;
+            border-radius: 12px;
+            font-size: 13px;
+            color: #AAAAAA;
+        }
+
+        /* Twitter/X Dark Mode */
+        .twitter .variant-header {
+            background: linear-gradient(135deg, #1DA1F2 0%, #0D8BD9 100%);
+        }
+
+        .twitter .container {
+            background: #000000;
+            border-radius: 16px;
+            padding: 16px;
+            color: #ffffff;
+            border: 1px solid #2F3336;
+        }
+
+        .twitter .card {
+            background: #000000;
+            border-radius: 16px;
+            padding: 16px;
+            margin-bottom: 16px;
+            border: 1px solid #2F3336;
+        }
+
+        .twitter .card-header {
+            font-weight: 700;
+            font-size: 16px;
+            color: #ffffff;
+            margin-bottom: 12px;
+        }
+
+        .twitter input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid #2F3336;
+            border-radius: 20px;
+            background: #000000;
+            color: #ffffff;
+            font-size: 15px;
+            margin-bottom: 12px;
+        }
+
+        .twitter input:focus {
+            border-color: #1DA1F2;
+            outline: none;
+        }
+
+        .twitter button {
+            width: 100%;
+            padding: 12px 16px;
+            background: #1DA1F2;
+            color: white;
+            border: none;
+            border-radius: 20px;
+            font-size: 15px;
+            font-weight: 700;
+            margin-bottom: 12px;
+        }
+
+        .twitter .result-box {
+            padding: 12px;
+            background: #000000;
+            border: 1px solid #2F3336;
+            border-radius: 16px;
+            font-size: 13px;
+            color: #71767B;
+        }
+
+        /* VS Code Dark Mode */
+        .vscode .variant-header {
+            background: linear-gradient(135deg, #007ACC 0%, #005A9E 100%);
+        }
+
+        .vscode .container {
+            background: #1E1E1E;
+            border-radius: 6px;
+            padding: 16px;
+            color: #CCCCCC;
+            border: 1px solid #3C3C3C;
+        }
+
+        .vscode .card {
+            background: #252526;
+            border-radius: 6px;
+            padding: 16px;
+            margin-bottom: 16px;
+            border: 1px solid #3C3C3C;
+        }
+
+        .vscode .card-header {
+            font-weight: 600;
+            font-size: 14px;
+            color: #CCCCCC;
+            margin-bottom: 12px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .vscode input {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #3C3C3C;
+            border-radius: 3px;
+            background: #3C3C3C;
+            color: #CCCCCC;
+            font-size: 13px;
+            margin-bottom: 12px;
+            font-family: 'Consolas', 'Courier New', monospace;
+        }
+
+        .vscode input:focus {
+            border-color: #007ACC;
+            outline: none;
+        }
+
+        .vscode button {
+            width: 100%;
+            padding: 8px 16px;
+            background: #0E639C;
+            color: white;
+            border: none;
+            border-radius: 3px;
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 12px;
+        }
+
+        .vscode .result-box {
+            padding: 12px;
+            background: #3C3C3C;
+            border-radius: 3px;
+            font-size: 12px;
+            color: #9CDCFE;
+            font-family: 'Consolas', 'Courier New', monospace;
+        }
+
+        /* Toggle styles for each variant */
+        .toggle-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 6px 0 0 0;
+            padding: 0;
+            gap: 7px;
+        }
+
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 32px;
+            height: 18px;
+            margin-left: 4px;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: #e0e0e0;
+            transition: background 0.18s;
+            border-radius: 18px;
+            box-shadow: none;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 12px;
+            width: 12px;
+            left: 3px;
+            bottom: 3px;
+            background: #fff;
+            transition: transform 0.18s, background 0.18s;
+            border-radius: 50%;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.08);
+        }
+
+        input:checked + .slider {
+            background: #1cb557;
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(14px);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .comparison-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🛡️ ShieldBox UI Design Comparison</h1>
+        <p>Exploring how ShieldBox looks across different design systems and platforms</p>
+    </div>
+
+    <div class="comparison-grid">
+        <!-- Original ShieldBox Design -->
+        <div class="ui-variant original">
+            <div class="variant-header">Original ShieldBox (Current)</div>
+            <div class="variant-content">
+                <div class="container">
+                    <div class="card">
+                        <div class="card-header">🔗 Manual Link Scan</div>
+                        <input type="text" placeholder="Paste URL here..." />
+                        <button>🚀 Scan</button>
+                        <div class="result-box">No scan yet.</div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">📧 Email Scan</div>
+                        <button>🚀 Scan Email</button>
+                        <div class="result-box">No scan yet.</div>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="card-header">⚙️ Controls</div>
+                        <div class="toggle-row">
+                            <span>Auto Scan</span>
+                            <label class="switch">
+                                <input type="checkbox" checked />
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        <div class="toggle-row">
+                            <span>IoT Alerts</span>
+                            <label class="switch">
+                                <input type="checkbox" checked />
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="card-header">📊 Auto Scan Status</div>
+                        <div class="result-box">Auto scan idle.</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- iOS Dark Mode -->
+        <div class="ui-variant ios-dark">
+            <div class="variant-header">iOS Design (Dark)</div>
+            <div class="variant-content">
+                <div class="container">
+                    <div class="card">
+                        <div class="card-header">🔗 Manual Link Scan</div>
+                        <input type="text" placeholder="Paste URL here..." />
+                        <button>🚀 Scan</button>
+                        <div class="result-box">No scan yet.</div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">📧 Email Scan</div>
+                        <button>🚀 Scan Email</button>
+                        <div class="result-box">No scan yet.</div>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="card-header">⚙️ Controls</div>
+                        <div class="toggle-row">
+                            <span>Auto Scan</span>
+                            <label class="switch">
+                                <input type="checkbox" checked />
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        <div class="toggle-row">
+                            <span>IoT Alerts</span>
+                            <label class="switch">
+                                <input type="checkbox" checked />
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="card-header">📊 Auto Scan Status</div>
+                        <div class="result-box">Auto scan idle.</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Android Dark Mode -->
+        <div class="ui-variant android-dark">
+            <div class="variant-header">Android Material (Dark)</div>
+            <div class="variant-content">
+                <div class="container">
+                    <div class="card">
+                        <div class="card-header">🔗 MANUAL LINK SCAN</div>
+                        <input type="text" placeholder="Paste URL here..." />
+                        <button>🚀 SCAN</button>
+                        <div class="result-box">No scan yet.</div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">📧 EMAIL SCAN</div>
+                        <button>🚀 SCAN EMAIL</button>
+                        <div class="result-box">No scan yet.</div>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="card-header">⚙️ CONTROLS</div>
+                        <div class="toggle-row">
+                            <span>Auto Scan</span>
+                            <label class="switch">
+                                <input type="checkbox" checked />
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        <div class="toggle-row">
+                            <span>IoT Alerts</span>
+                            <label class="switch">
+                                <input type="checkbox" checked />
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="card-header">📊 AUTO SCAN STATUS</div>
+                        <div class="result-box">Auto scan idle.</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Microsoft Fluent Dark Mode -->
+        <div class="ui-variant fluent-dark">
+            <div class="variant-header">Microsoft Fluent (Dark)</div>
+            <div class="variant-content">
+                <div class="container">
+                    <div class="card">
+                        <div class="card-header">🔗 Manual Link Scan</div>
+                        <input type="text" placeholder="Paste URL here..." />
+                        <button>🚀 Scan</button>
+                        <div class="result-box">No scan yet.</div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">📧 Email Scan</div>
+                        <button>🚀 Scan Email</button>
+                        <div class="result-box">No scan yet.</div>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="card-header">⚙️ Controls</div>
+                        <div class="toggle-row">
+                            <span>Auto Scan</span>
+                            <label class="switch">
+                                <input type="checkbox" checked />
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        <div class="toggle-row">
+                            <span>IoT Alerts</span>
+                            <label class="switch">
+                                <input type="checkbox" checked />
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="card-header">📊 Auto Scan Status</div>
+                        <div class="result-box">Auto scan idle.</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- GitHub Dark Mode -->
+        <div class="ui-variant github-dark">
+            <div class="variant-header">GitHub Design (Dark)</div>
+            <div class="variant-content">
+                <div class="container">
+                    <div class="card">
+                        <div class="card-header">🔗 Manual Link Scan</div>
+                        <input type="text" placeholder="Paste URL here..." />
+                        <button>🚀 Scan</button>
+                        <div class="result-box">No scan yet.</div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">📧 Email Scan</div>
+                        <button>🚀 Scan Email</button>
+                        <div class="result-box">No scan yet.</div>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="card-header">⚙️ Controls</div>
+                        <div class="toggle-row">
+                            <span>Auto Scan</span>
+                            <label class="switch">
+                                <input type="checkbox" checked />
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        <div class="toggle-row">
+                            <span>IoT Alerts</span>
+                            <label class="switch">
+                                <input type="checkbox" checked />
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="card-header">📊 Auto Scan Status</div>
+                        <div class="result-box">Auto scan idle.</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Discord Style -->
+        <div class="ui-variant discord">
+            <div class="variant-header">Discord Dark Theme</div>
+            <div class="variant-content">
+                <div class="container">
+                    <div class="card">
+                        <div class="card-header">🔗 Manual Link Scan</div>
+                        <input type="text" placeholder="Paste URL here..." />
+                        <button>🚀 Scan</button>
+                        <div class="result-box">No scan yet.</div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">📧 Email Scan</div>
+                        <button>🚀 Scan Email</button>
+                        <div class="result-box">No scan yet.</div>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="card-header">⚙️ Controls</div>
+                        <div class="toggle-row">
+                            <span>Auto Scan</span>
+                            <label class="switch">
+                                <input type="checkbox" checked />
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        <div class="toggle-row">
+                            <span>IoT Alerts</span>
+                            <label class="switch">
+                                <input type="checkbox" checked />
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="card-header">📊 Auto Scan Status</div>
+                        <div class="result-box">Auto scan idle.</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Netflix Dark Mode -->
+        <div class="ui-variant netflix">
+            <div class="variant-header">Netflix Dark Theme</div>
+            <div class="variant-content">
+                <div class="container">
+                    <div class="card">
+                        <div class="card-header">🔗 Manual Link Scan</div>
+                        <input type="text" placeholder="Paste URL here..." />
+                        <button>🚀 Scan</button>
+                        <div class="result-box">No scan yet.</div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">📧 Email Scan</div>
+                        <button>🚀 Scan Email</button>
+                        <div class="result-box">No scan yet.</div>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="card-header">⚙️ Controls</div>
+                        <div class="toggle-row">
+                            <span>Auto Scan</span>
+                            <label class="switch">
+                                <input type="checkbox" checked />
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        <div class="toggle-row">
+                            <span>IoT Alerts</span>
+                            <label class="switch">
+                                <input type="checkbox" checked />
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="card-header">📊 Auto Scan Status</div>
+                        <div class="result-box">Auto scan idle.</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Spotify Dark Mode -->
+        <div class="ui-variant spotify">
+            <div class="variant-header">Spotify Dark Theme</div>
+            <div class="variant-content">
+                <div class="container">
+                    <div class="card">
+                        <div class="card-header">🔗 Manual Link Scan</div>
+                        <input type="text" placeholder="Paste URL here..." />
+                        <button>🚀 Scan</button>
+                        <div class="result-box">No scan yet.</div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">📧 Email Scan</div>
+                        <button>🚀 Scan Email</button>
+                        <div class="result-box">No scan yet.</div>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="card-header">⚙️ Controls</div>
+                        <div class="toggle-row">
+                            <span>Auto Scan</span>
+                            <label class="switch">
+                                <input type="checkbox" checked />
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        <div class="toggle-row">
+                            <span>IoT Alerts</span>
+                            <label class="switch">
+                                <input type="checkbox" checked />
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="card-header">📊 Auto Scan Status</div>
+                        <div class="result-box">Auto scan idle.</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slack Dark Mode -->
+        <div class="ui-variant slack">
+            <div class="variant-header">Slack Dark Theme</div>
+            <div class="variant-content">
+                <div class="container">
+                    <div class="card">
+                        <div class="card-header">🔗 Manual Link Scan</div>
+                        <input type="text" placeholder="Paste URL here..." />
+                        <button>🚀 Scan</button>
+                        <div class="result-box">No scan yet.</div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">📧 Email Scan</div>
+                        <button>🚀 Scan Email</button>
+                        <div class="result-box">No scan yet.</div>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="card-header">⚙️ Controls</div>
+                        <div class="toggle-row">
+                            <span>Auto Scan</span>
+                            <label class="switch">
+                                <input type="checkbox" checked />
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        <div class="toggle-row">
+                            <span>IoT Alerts</span>
+                            <label class="switch">
+                                <input type="checkbox" checked />
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="card-header">📊 Auto Scan Status</div>
+                        <div class="result-box">Auto scan idle.</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Telegram Dark Mode -->
+        <div class="ui-variant telegram">
+            <div class="variant-header">Telegram Dark Theme</div>
+            <div class="variant-content">
+                <div class="container">
+                    <div class="card">
+                        <div class="card-header">🔗 Manual Link Scan</div>
+                        <input type="text" placeholder="Paste URL here..." />
+                        <button>🚀 Scan</button>
+                        <div class="result-box">No scan yet.</div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">📧 Email Scan</div>
+                        <button>🚀 Scan Email</button>
+                        <div class="result-box">No scan yet.</div>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="card-header">⚙️ Controls</div>
+                        <div class="toggle-row">
+                            <span>Auto Scan</span>
+                            <label class="switch">
+                                <input type="checkbox" checked />
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        <div class="toggle-row">
+                            <span>IoT Alerts</span>
+                            <label class="switch">
+                                <input type="checkbox" checked />
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="card-header">📊 Auto Scan Status</div>
+                        <div class="result-box">Auto scan idle.</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Twitter/X Dark Mode -->
+        <div class="ui-variant twitter">
+            <div class="variant-header">Twitter/X Dark Theme</div>
+            <div class="variant-content">
+                <div class="container">
+                    <div class="card">
+                        <div class="card-header">🔗 Manual Link Scan</div>
+                        <input type="text" placeholder="Paste URL here..." />
+                        <button>🚀 Scan</button>
+                        <div class="result-box">No scan yet.</div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">📧 Email Scan</div>
+                        <button>🚀 Scan Email</button>
+                        <div class="result-box">No scan yet.</div>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="card-header">⚙️ Controls</div>
+                        <div class="toggle-row">
+                            <span>Auto Scan</span>
+                            <label class="switch">
+                                <input type="checkbox" checked />
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        <div class="toggle-row">
+                            <span>IoT Alerts</span>
+                            <label class="switch">
+                                <input type="checkbox" checked />
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="card-header">📊 Auto Scan Status</div>
+                        <div class="result-box">Auto scan idle.</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- VS Code Dark Mode -->
+        <div class="ui-variant vscode">
+            <div class="variant-header">VS Code Dark Theme</div>
+            <div class="variant-content">
+                <div class="container">
+                    <div class="card">
+                        <div class="card-header">🔗 Manual Link Scan</div>
+                        <input type="text" placeholder="Paste URL here..." />
+                        <button>🚀 Scan</button>
+                        <div class="result-box">No scan yet.</div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">📧 Email Scan</div>
+                        <button>🚀 Scan Email</button>
+                        <div class="result-box">No scan yet.</div>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="card-header">⚙️ Controls</div>
+                        <div class="toggle-row">
+                            <span>Auto Scan</span>
+                            <label class="switch">
+                                <input type="checkbox" checked />
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        <div class="toggle-row">
+                            <span>IoT Alerts</span>
+                            <label class="switch">
+                                <input type="checkbox" checked />
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="card-header">📊 Auto Scan Status</div>
+                        <div class="result-box">Auto scan idle.</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Add some interactivity to demonstrate the different styles
+        document.querySelectorAll('button').forEach(button => {
+            button.addEventListener('click', function() {
+                const resultBox = this.parentNode.querySelector('.result-box');
+                resultBox.textContent = 'Scanning... 🔍';
+                resultBox.style.backgroundColor = '#fff3cd';
+                resultBox.style.color = '#856404';
+                
+                setTimeout(() => {
+                    resultBox.textContent = '✅ URL is safe to visit';
+                    resultBox.style.backgroundColor = '#d4edda';
+                    resultBox.style.color = '#155724';
+                }, 2000);
+            });
+        });
+
+        // Make toggles functional
+        document.querySelectorAll('input[type="checkbox"]').forEach(toggle => {
+            toggle.addEventListener('change', function() {
+                console.log(`${this.id || 'Toggle'} is now ${this.checked ? 'enabled' : 'disabled'}`);
+            });
+        });
+    </script>
+</body>
+</html>
