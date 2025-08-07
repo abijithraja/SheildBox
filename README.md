@@ -1,306 +1,94 @@
-# ShieldBox - Enterprise Cybersecurity Platform
+# 🛡️ ShieldBox - Smart Email & URL Security System
 
 <div align="center">
 
-[![ShieldBox](https://img.shields.io/badge/ShieldBox-Enterprise%20Security-blue?style=for-the-badge&logo=shield&logoColor=white)](https://github.com/abijithraja/ShieldBox)
-[![Python](https://img.shields.io/badge/Python-3.8%2B-blue?style=flat-square&logo=python&logoColor=white)](https://python.org)
-[![Flask](https://img.shields.io/badge/Flask-2.0%2B-green?style=flat-square&logo=flask&logoColor=white)](https://flask.palletsprojects.com/)
-[![Machine Learning](https://img.shields.io/badge/ML-Scikit%20Learn-orange?style=flat-square&logo=scikit-learn&logoColor=white)](https://scikit-learn.org/)
-[![IoT](https://img.shields.io/badge/IoT-ESP32-red?style=flat-square&logo=espressif&logoColor=white)](https://espressif.com/)
-[![MQTT](https://img.shields.io/badge/MQTT-Protocol-purple?style=flat-square&logo=mqtt&logoColor=white)](https://mqtt.org/)
-[![License](https://img.shields.io/badge/License-MIT-green?style=flat-square&logo=opensource&logoColor=white)](LICENSE)
+[![Python](https://img.shields.io/badge/Python-3.8+-blue?style=flat-square&logo=python)](https://python.org)
+[![Flask](https://img.shields.io/badge/Flask-2.0+-green?style=flat-square&logo=flask)](https://flask.palletsprojects.com/)
+[![Machine Learning](https://img.shields.io/badge/ML-Scikit%20Learn-orange?style=flat-square&logo=scikit-learn)](https://scikit-learn.org/)
+[![ESP32](https://img.shields.io/badge/IoT-ESP32-red?style=flat-square&logo=espressif)](https://espressif.com/)
+[![License](https://img.shields.io/badge/License-MIT-green?style=flat-square)](LICENSE)
 
-**An intelligent, multi-layered cybersecurity platform leveraging advanced machine learning algorithms, real-time threat detection, and IoT integration to provide comprehensive protection against sophisticated cyber threats.**
-
-<br>
-
-[![Documentation](https://img.shields.io/badge/📖-Documentation-blue?style=for-the-badge)](docs/)
-[![Quick Start](https://img.shields.io/badge/⚡-Quick%20Start-green?style=for-the-badge)](#quick-start)
-[![API Reference](https://img.shields.io/badge/🔗-API%20Reference-orange?style=for-the-badge)](#api-reference)
-[![Demo](https://img.shields.io/badge/🎥-Live%20Demo-red?style=for-the-badge)](#demo)
+**A smart cybersecurity system that detects phishing emails and malicious URLs using machine learning, with real-time alerts via ESP32 hardware and Telegram notifications.**
 
 </div>
 
-<br>
-
-## Executive Summary
-
-ShieldBox represents a cutting-edge approach to cybersecurity, integrating artificial intelligence, real-time threat analysis, and physical IoT alerting systems. Built for enterprises requiring robust email security, URL protection, and comprehensive threat monitoring, ShieldBox delivers sub-100ms response times while maintaining 96%+ accuracy across threat detection models.
-
-## Table of Contents
-
-- [Architecture Overview](#architecture-overview)
-- [Core Features](#core-features)  
-- [Technology Stack](#technology-stack)
-- [Quick Start](#quick-start)
-- [System Requirements](#system-requirements)
-- [Installation Guide](#installation-guide)
-- [API Reference](#api-reference)
-- [Performance Metrics](#performance-metrics)
-- [Security Framework](#security-framework)
-- [Deployment Options](#deployment-options)
-- [Contributing](#contributing)
-- [Enterprise Support](#enterprise-support)
-
 ---
 
-## Architecture Overview
+## 🎯 What is ShieldBox?
 
-ShieldBox employs a microservices architecture optimized for scalability, reliability, and performance. The system consists of four primary components working in concert to deliver comprehensive threat protection.
+ShieldBox is a personal cybersecurity project that helps protect you from:
+- **📧 Fraudulent Emails**: Detects donation scams, phishing attempts, and spam
+- **🌐 Malicious URLs**: Identifies dangerous websites and phishing links  
+- **🚨 Real-time Alerts**: Physical alerts via ESP32 LEDs/buzzer + Telegram notifications
+- **🔍 Gmail Integration**: Browser extension for automatic email scanning
 
-```mermaid
-graph TB
-    subgraph "Client Layer"
-        A[Browser Extension]
-        B[Web Interface]
-        C[Mobile Client]
-    end
-    
-    subgraph "API Gateway"
-        D[Flask REST API]
-        E[Authentication Layer]
-        F[Rate Limiting]
-    end
-    
-    subgraph "Processing Engine"
-        G[ML Pipeline]
-        H[Pattern Matcher]
-        I[Cache Layer]
-        J[Analytics Engine]
-    end
-    
-    subgraph "Communication Layer"
-        K[MQTT Broker]
-        L[Telegram Gateway]
-        M[WebSocket Server]
-    end
-    
-    subgraph "IoT Infrastructure"
-        N[ESP32 Devices]
-        O[Alert Systems]
-        P[Monitoring Sensors]
-    end
-    
-    subgraph "Data Layer"
-        Q[Model Storage]
-        R[Configuration DB]
-        S[Analytics DB]
-    end
-    
-    A --> D
-    B --> D
-    C --> D
-    D --> G
-    D --> H
-    G --> I
-    H --> I
-    D --> K
-    K --> L
-    K --> N
-    N --> O
-    G --> Q
-    J --> S
+## ✨ Features
+
+### 🧠 Smart Detection
+- **Email Analysis**: Distinguishes between safe, spam, phishing, and fraudulent emails
+- **URL Scanning**: Analyzes links for phishing indicators and malicious content
+- **Pattern Recognition**: Fast detection of common scam patterns (donation frauds, etc.)
+- **Auto-Scan Mode**: Automatic Gmail integration with ultra-fast processing
+
+### 🔔 Alert System  
+- **ESP32 Hardware**: Visual (LED) and audio (buzzer) alerts
+- **Telegram Bot**: Instant mobile notifications
+- **Chrome Extension**: Real-time web protection
+- **MQTT Communication**: Reliable message delivery
+
+## 🏗️ How It Works
+
+```
+📧 Email/URL Input → 🧠 ML Analysis → 🚨 Alert Decision → 📱 Notifications
+                                                    ↓
+                                               🔴🟢 ESP32 LEDs
 ```
 
-### Component Architecture
-
-| Component | Technology | Purpose | SLA |
-|-----------|------------|---------|-----|
-| **API Gateway** | Flask + Gunicorn | Request routing, authentication | 99.9% |
-| **ML Engine** | Scikit-learn + Custom | Threat classification | <100ms |
-| **MQTT Service** | Paho MQTT | Real-time messaging | 99.95% |
-| **IoT Layer** | ESP32 + Arduino | Physical alerting | 99.8% |
-| **Browser Extension** | Vanilla JS | Client-side protection | Real-time |
+### System Components
+- **Backend API** (Flask): Handles email/URL analysis
+- **Machine Learning Models**: Trained on email and URL datasets  
+- **Chrome Extension**: Integrates with Gmail for auto-scanning
+- **ESP32 Hardware**: Physical alert device with LEDs and buzzer
+- **MQTT Service**: Manages real-time communication
+- **Telegram Bot**: Sends mobile notifications
 
 ---
 
-## Core Features
+## 🚀 Quick Setup
 
-### Threat Detection Capabilities
-
-<table>
-<tr>
-<td width="50%">
-
-**Email Security Engine**
-- Multi-class classification (Safe/Spam/Phishing/Fraudulent)
-- Real-time Gmail integration
-- Advanced pattern recognition
-- Donation scam detection
-- Contextual analysis engine
-
-**URL Protection System**
-- Phishing URL detection
-- Real-time threat scoring
-- Domain reputation analysis
-- Click-through protection
-- Advanced feature extraction (30+ indicators)
-
-</td>
-<td width="50%">
-
-**Performance Optimization**
-- Sub-100ms response times
-- Intelligent caching (99.1% accuracy)
-- Predictive pre-loading
-- Async processing pipeline
-- Load balancing ready
-
-**Enterprise Integration**
-- RESTful API architecture
-- Webhook support
-- SSO integration ready
-- Audit logging
-- Custom alerting rules
-
-</td>
-</tr>
-</table>
-
-### IoT & Communication Framework
-
-| Feature | Specification | Implementation |
-|---------|---------------|----------------|
-| **Hardware Alerts** | ESP32-based multi-modal alerts | Visual (RGB LED) + Audio (Buzzer) |
-| **MQTT Protocol** | Pub/Sub messaging | HiveMQ Cloud + Custom broker support |
-| **Telegram Integration** | Real-time notifications | Bot API + Group messaging |
-| **Browser Extension** | Chrome/Edge compatibility | Content script + Background service |
-| **Response Time** | End-to-end latency | <100ms (95th percentile) |
-
----
-
-## Technology Stack
-
-### Backend Infrastructure
-
-```yaml
-Core Framework:
-  - Flask 2.0+ (REST API)
-  - Python 3.8+ (Runtime)
-  - Gunicorn (WSGI Server)
-  
-Machine Learning:
-  - Scikit-learn (Classification)
-  - Pandas/NumPy (Data processing)
-  - Joblib (Model serialization)
-  
-Communication:
-  - Paho MQTT (IoT messaging)
-  - Requests (HTTP client)
-  - WebSockets (Real-time updates)
-```
-
-### Frontend & Integration
-
-```yaml
-Browser Extension:
-  - Vanilla JavaScript (ES6+)
-  - Chrome Extension API v3
-  - Content Security Policy compliant
-  
-IoT Hardware:
-  - ESP32 microcontroller
-  - Arduino IDE/Framework
-  - WiFi connectivity
-  
-External Services:
-  - Telegram Bot API
-  - HiveMQ Cloud MQTT
-  - Gmail API integration
-```
-
----
-
-## Quick Start
-
-### Prerequisites Verification
-
-Ensure your development environment meets the following requirements:
-
+### 1. Backend Setup
 ```bash
-# Verify Python installation
-python --version  # Required: 3.8+
-
-# Verify Node.js (for extension development)
-node --version    # Required: 14.0+
-
-# Verify Git installation
-git --version
-```
-
-### Rapid Deployment (5 Minutes)
-
-```bash
-# 1. Clone and navigate
+# Clone the project
 git clone https://github.com/abijithraja/ShieldBox.git
-cd ShieldBox
+cd ShieldBox/Backend
 
-# 2. Environment setup
-python -m venv venv
-source venv/bin/activate  # Windows: venv\Scripts\activate
-
-# 3. Install dependencies
-cd Backend
+# Install dependencies
 pip install -r requirements.txt
 
-# 4. Initialize services
-python main.py &          # Main API (Port 5000)
-python mqtt_service.py &  # MQTT Service (Port 5001)
+# Start the services
+python main.py          # Main API (Port 5000)
+python mqtt_service.py  # MQTT Service (Port 5001)
 ```
 
-### Browser Extension Setup
+### 2. Browser Extension
+1. Open Chrome → `chrome://extensions/`
+2. Enable "Developer mode"  
+3. Click "Load unpacked" → Select the `extension` folder
+4. Extension is now active in your browser!
 
-1. **Chrome Extension Installation**
-   ```bash
-   # Navigate to chrome://extensions/
-   # Enable "Developer mode"
-   # Click "Load unpacked" → Select /extension folder
-   ```
-
-2. **Verify Installation**
-   - Extension icon appears in Chrome toolbar
-   - Test with any email or webpage
-   - Check console for "[ShieldBox]" messages
-
-### Hardware Configuration (Optional)
-
+### 3. ESP32 Hardware (Optional)
 ```cpp
 // Update WiFi credentials in Shieldboxalert.ino
-const char* ssid = "YOUR_NETWORK_NAME";
+const char* ssid = "YOUR_WIFI_NAME";
 const char* password = "YOUR_WIFI_PASSWORD";
 
 // Upload to ESP32 via Arduino IDE
 ```
 
----
-
-## System Requirements
-
-### Minimum System Requirements
-
-| Component | Specification | Notes |
-|-----------|---------------|-------|
-| **OS** | Windows 10/11, macOS 10.14+, Ubuntu 18.04+ | Cross-platform compatible |
-| **Memory** | 4GB RAM | 8GB recommended for production |
-| **Storage** | 500MB available space | Plus datasets and models |
-| **Network** | Broadband internet connection | For MQTT and Telegram integration |
-| **Browser** | Chrome 88+, Edge 88+ | Extension compatibility |
-
-### Production Environment
-
-```yaml
-Recommended Specifications:
-  CPU: 4+ cores (Intel i5/AMD Ryzen 5 equivalent)
-  Memory: 16GB RAM
-  Storage: 10GB SSD
-  Network: 100Mbps+ with low latency
-  
-Scaling Considerations:
-  - Load balancer for API endpoints
-  - Redis for distributed caching
-  - PostgreSQL for analytics storage
-  - Docker containerization support
-```
+### 4. Telegram Bot (Optional)
+1. Message @BotFather on Telegram to create a bot
+2. Get your bot token and chat ID
+3. Update `mqtt_service.py` with your credentials
 
 ---
 
