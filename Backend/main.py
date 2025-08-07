@@ -96,18 +96,25 @@ except Exception as e:
 
 print(f"🚀 ULTRA-FAST model ready. Mode: {_MODEL_MODE}")
 
-# === ULTRA-FAST PATTERNS: Simplified single regex ===
+# === ULTRA-FAST PATTERNS: Enhanced fraud detection patterns ===
 import re
 _INSTANT_PATTERNS = re.compile(
     r'\b(?:donate.*(?:bank|transfer|wire|account)|'
     r'charity.*(?:details|money|send)|'
-    r'urgent.*donation|'
+    r'urgent.*(?:donation|sponsor|child|life|help)|'
+    r'sponsor.*(?:child|life|save)|'
+    r'save.*(?:life|child|children)|'
+    r'shelter.*(?:gone|destroyed|need)|'
+    r'lives.*(?:in.*your.*hands|depend|urgent)|'
     r'exclusive.*(?:deal|fast)|'
     r'limited.*(?:time|stock)|'
     r'you.*won.*claim|'
     r'congratulations.*prize|'
     r'flash.*sale.*hurry|'
-    r'amazing.*deal.*now)\b', 
+    r'amazing.*deal.*now|'
+    r'their.*shelter.*is.*gone|'
+    r'urgent.*sponsor.*child|'
+    r'dear.*(?:kind|friend).*urgent)\b', 
     re.IGNORECASE | re.DOTALL
 )
 
@@ -177,6 +184,41 @@ def _ultra_fast_predict(text):
             _CACHE_SIZE += 1
         return result
     
+    # === ENHANCED FRAUD DETECTION: Match manual scan logic ===
+    # Check for donation scam patterns (same as manual scan)
+    donation_scam_patterns = [
+        ("urgent", "sponsor"), ("shelter", "gone"), ("lives", "hands"),
+        ("donate", "child"), ("save", "life"), ("urgent", "help"),
+        ("charity", "children"), ("sponsor", "child"), ("fund", "urgent"),
+        ("donation", "urgent"), ("help", "children"), ("save", "children")
+    ]
+    
+    # Check for promotional spam patterns
+    promotional_spam_patterns = [
+        ("exclusive deal", "act fast"), ("limited time", "only"), 
+        ("flash sale", "hurry up"), ("you've won", "claim now"),
+        ("amazing deal", "order now"), ("special offer", "limited stock"),
+        ("congratulations", "prize"), ("discount", "expires")
+    ]
+    
+    # Enhanced pattern matching
+    has_donation_scam = any(
+        all(kw in text_lower for kw in pattern) 
+        for pattern in donation_scam_patterns
+    )
+    
+    has_promotional_spam = any(
+        all(kw in text_lower for kw in pattern) 
+        for pattern in promotional_spam_patterns
+    )
+    
+    if has_donation_scam or has_promotional_spam:
+        result = ("fraudulent", "donation scam patterns detected" if has_donation_scam else "promotional spam detected")
+        if _CACHE_SIZE < MAX_CACHE:
+            _INSTANT_CACHE[text_key] = result
+            _CACHE_SIZE += 1
+        return result
+    
     # Model prediction - optimized path (only if no patterns match)
     try:
         if _MODEL_MODE == 'direct':
@@ -187,12 +229,28 @@ def _ultra_fast_predict(text):
             label = _FAST_ENCODER.inverse_transform([prediction])[0]
         elif _MODEL_MODE == 'pipeline':
             label = _FAST_MODEL.predict([text_lower])[0]
-        else:  # fallback
+        else:  # fallback - use manual scan model for consistency
             vector = _FAST_VECTORIZER.transform([text_lower])
             prediction = _FAST_MODEL.predict(vector)[0]
             label = _FAST_ENCODER.inverse_transform([prediction])[0]
         
-        reason = "model classification"
+        # === CONSISTENCY CHECK: Override if model says safe but has suspicious keywords ===
+        if label.lower() in ['safe', 'legitimate']:
+            # Additional fraud keyword check for edge cases
+            suspicious_keywords = [
+                'urgent', 'sponsor', 'donate', 'charity', 'fund', 'help children',
+                'save life', 'shelter gone', 'lives in your hands', 'dear kind'
+            ]
+            keyword_count = sum(1 for keyword in suspicious_keywords if keyword in text_lower)
+            
+            if keyword_count >= 2:  # Multiple suspicious keywords
+                label = "fraudulent" 
+                reason = f"model override - {keyword_count} suspicious keywords detected"
+            else:
+                reason = "model classification"
+        else:
+            reason = "model classification"
+            
     except Exception as e:
         # Fallback on any model error
         label = "safe"
@@ -227,6 +285,9 @@ def scan_email_auto():
         prediction_start = time.time()
         label, reason = _ultra_fast_predict(text)
         prediction_time = time.time() - prediction_start
+        
+        # === DEBUG: Log prediction details for troubleshooting ===
+        print(f"🔍 Auto-scan DEBUG: '{text[:100]}...' → {label} ({reason})")
         
         result = {
             "status": label,
@@ -350,6 +411,9 @@ def scan_email():
                 reason = "Model classification"
         else:
             reason = "Model classification (legitimate source)"
+
+        # === DEBUG: Log manual scan details for comparison ===
+        print(f"🔍 Manual scan DEBUG: '{text[:100]}...' → {label} ({reason})")
 
         # Publish classification result to ESP32 via MQTT Service
         send_to_mqtt_service(label, "shieldbox/email_scan", iot_enabled)
