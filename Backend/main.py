@@ -12,7 +12,7 @@ app = Flask(__name__)
 CORS(app)  # Allow extension to access API
 
 # --- Integration Function for MQTT Service ---
-def send_to_mqtt_service(label, topic="shieldbox/email_scan", iot_enabled=True, telegram_enabled=True):
+def send_to_mqtt_service(label, risk_percentage=50.0, topic="shieldbox/email_scan", iot_enabled=True, telegram_enabled=True, source="manual"):
     """Send classification result to dedicated MQTT service with Telegram handling"""
     import threading
     
@@ -21,11 +21,14 @@ def send_to_mqtt_service(label, topic="shieldbox/email_scan", iot_enabled=True, 
             print("🔇 IoT disabled - MQTT message not sent")
         else:
             try:
+                print(f"🚀 Sending to MQTT: label={label}, risk={risk_percentage}, source={source}")
                 response = requests.post("http://127.0.0.1:5001/mqtt-publish", 
                                        json={
                                            "message": label, 
+                                           "risk": risk_percentage,  # Include actual risk percentage
                                            "topic": topic,
-                                           "telegram_enabled": telegram_enabled
+                                           "telegram_enabled": telegram_enabled,
+                                           "source": source  # Add source field for ESP32 filtering
                                        },
                                        timeout=2)  # Quick timeout to avoid blocking
                 print("📡 Sent to MQTT Service:", response.json())
@@ -273,7 +276,7 @@ def scan_email_auto():
     data = request.get_json()
     subject = data.get("subject", "")
     body = data.get("body", "")
-    iot_enabled = data.get("iot_enabled", True)  # Default to True for backward compatibility
+    iot_enabled = True  # Auto scans ALWAYS send to IoT/ESP32
 
     if not subject and not body:
         return jsonify({"error": "Missing subject and body"}), 400
@@ -281,91 +284,13 @@ def scan_email_auto():
     try:
         text = (subject + " " + body).lower()
         
-        # === ULTRA-FAST PREDICTION: Single optimized function ===
+        # Use the same email model logic as manual scan for correct classification
         prediction_start = time.time()
-        label, reason = _ultra_fast_predict(text)
-        prediction_time = time.time() - prediction_start
-        
-        # === DEBUG: Log prediction details for troubleshooting ===
-        print(f"🔍 Auto-scan DEBUG: '{text[:100]}...' → {label} ({reason})")
-        
-        result = {
-            "status": label,
-            "reason": reason,
-            "subject": subject,
-            "body": body,
-            "performance": {
-                "prediction_time": round(prediction_time * 1000, 2),  # ms
-                "total_time": round((time.time() - start_time) * 1000, 2)  # ms
-            }
-        }
-        
-        # Publish classification result to ESP32 via MQTT Service (async-style)
-        mqtt_start = time.time()
-        send_to_mqtt_service(label, "shieldbox/email_scan", iot_enabled)
-        mqtt_time = time.time() - mqtt_start
-        
-        result["performance"]["mqtt_time"] = round(mqtt_time * 1000, 2)
-        
-        total_time = time.time() - start_time
-        print(f"📊 Auto scan completed in {total_time:.3f}s (prediction: {prediction_time:.3f}s, mqtt: {mqtt_time:.3f}s)")
-        
-        return jsonify(result)
-    except Exception as e:
-        total_time = time.time() - start_time
-        print(f"❌ Auto scan failed after {total_time:.3f}s: {e}")
-        return jsonify({"error": "Auto model inference failed", "reason": str(e)}), 500
-
-# --- URL Scanner Route ---
-@app.route('/scan-link', methods=['POST'])
-def scan_link():
-    data = request.get_json()
-    url = data.get('url', '')
-    iot_enabled = data.get("iot_enabled", True)  # Default to True for backward compatibility
-
-    if not url.startswith("http"):
-        return jsonify({ "url": url, "status": "invalid", "reason": "Not a valid URL" })
-
-    try:
-        features = extract_features(url)
-        features_scaled = scaler.transform([features])
-        prob = phishing_model.predict_proba(features_scaled)[0][1]
-        is_phishing = int(prob >= threshold)
-        
-        # Determine classification result
-        classification = "phishing" if is_phishing else "safe"
-        
-        # Publish classification result to ESP32 via MQTT Service
-        send_to_mqtt_service(classification, "shieldbox/url_scan", iot_enabled)
-
-        return jsonify({
-            "url": url,
-            "status": classification,
-            "probability": round(float(prob), 4)
-        })
-
-    except Exception as e:
-        return jsonify({ "url": url, "status": "error", "reason": str(e) })
-
-
-# --- Email Scanner Route (subject + body -> phishing/scam/safe) ---
-@app.route('/scan-email', methods=['POST'])
-def scan_email():
-    data = request.get_json()
-    subject = data.get("subject", "")
-    body = data.get("body", "")
-    iot_enabled = data.get("iot_enabled", True)  # Default to True for backward compatibility
-
-    if not subject and not body:
-        return jsonify({"error": "Missing subject and body"}), 400
-
-    try:
-        text = (subject + " " + body).lower()
         vector = email_vectorizer.transform([text])
         prediction = email_model.predict(vector)[0]
         label = email_label_encoder.inverse_transform([prediction])[0]
 
-        # Add contextual checks for scam patterns (same as auto scan - more specific than just keywords)
+        # Add contextual checks for scam patterns (same as manual scan)
         # Check for legitimate domains first
         legitimate_domains = [
             "github.com", "google.com", "microsoft.com", "amazon.com", "linkedin.com",
@@ -411,12 +336,120 @@ def scan_email():
                 reason = "Model classification"
         else:
             reason = "Model classification (legitimate source)"
+        
+        prediction_time = time.time() - prediction_start
+        
+        # Calculate risk percentage based on classification
+        risk_scores = {
+            'safe': 30.0,
+            'legitimate': 35.0,
+            'spam': 45.0,
+            'suspicious': 75.0,
+            'phishing': 85.0,
+            'fraudulent': 90.0,
+            'scam': 88.0,
+            'malware': 95.0
+        }
+        risk_percentage = risk_scores.get(label.lower(), 50.0)
+        
+        # === DEBUG: Log prediction details for troubleshooting ===
+        print(f"🔍 Auto-scan DEBUG: '{text[:100]}...' → {label} ({reason}) ACTUAL Risk: {risk_percentage}% [Using manual scan model]")
+        
+        result = {
+            "status": label,
+            "reason": reason,
+            "subject": subject,
+            "body": body,
+            "performance": {
+                "prediction_time": round(prediction_time * 1000, 2),  # ms
+                "total_time": round((time.time() - start_time) * 1000, 2)  # ms
+            }
+        }
+        
+        # Auto email scans can send to ESP32 if iot_enabled=True (respects user choice)
+        mqtt_start = time.time()
+        send_to_mqtt_service(label, risk_percentage, "shieldbox/email_scan", iot_enabled, True, "auto")
+        mqtt_time = time.time() - mqtt_start
+        
+        result["performance"]["mqtt_time"] = round(mqtt_time * 1000, 2)
+        
+        total_time = time.time() - start_time
+        print(f"📊 Auto scan completed in {total_time:.3f}s (prediction: {prediction_time:.3f}s, mqtt: {mqtt_time:.3f}s)")
+        
+        return jsonify(result)
+    except Exception as e:
+        total_time = time.time() - start_time
+        print(f"❌ Auto scan failed after {total_time:.3f}s: {e}")
+        return jsonify({"error": "Auto model inference failed", "reason": str(e)}), 500
+
+# --- URL Scanner Route ---
+@app.route('/scan-link', methods=['POST'])
+def scan_link():
+    data = request.get_json()
+    url = data.get('url', '')
+    iot_enabled = data.get("iot_enabled", True)  # Default to True for backward compatibility
+
+    if not url.startswith("http"):
+        return jsonify({ "url": url, "status": "invalid", "reason": "Not a valid URL" })
+
+    try:
+        features = extract_features(url)
+        features_scaled = scaler.transform([features])
+        prob = phishing_model.predict_proba(features_scaled)[0][1]
+        is_phishing = int(prob >= threshold)
+        
+        # Determine classification result
+        classification = "phishing" if is_phishing else "safe"
+        risk_percentage = round(float(prob) * 100, 2)  # Convert probability to percentage
+        
+        # URL scans don't send to ESP32 - only Telegram alerts
+        send_to_mqtt_service(classification, risk_percentage, "shieldbox/url_scan", False, True, "manual")
+
+        return jsonify({
+            "url": url,
+            "status": classification,
+            "probability": round(float(prob), 4)
+        })
+
+    except Exception as e:
+        return jsonify({ "url": url, "status": "error", "reason": str(e) })
+
+
+# --- Email Scanner Route (subject + body -> phishing/scam/safe) ---
+@app.route('/scan-email', methods=['POST'])
+def scan_email():
+    data = request.get_json()
+    subject = data.get("subject", "")
+    body = data.get("body", "")
+    iot_enabled = data.get("iot_enabled", True)  # Default to True for backward compatibility
+
+    if not subject and not body:
+        return jsonify({"error": "Missing subject and body"}), 400
+
+    try:
+        text = (subject + " " + body).lower()
+        
+        # Use the same prediction logic as auto scan for consistency
+        label, reason = _ultra_fast_predict(text)
 
         # === DEBUG: Log manual scan details for comparison ===
-        print(f"🔍 Manual scan DEBUG: '{text[:100]}...' → {label} ({reason})")
+        print(f"🔍 Manual scan DEBUG: '{text[:100]}...' → {label} ({reason}) [Using email model]")
+        
+        # Calculate risk percentage based on classification
+        risk_scores = {
+            'safe': 30.0,
+            'legitimate': 35.0,
+            'spam': 45.0,
+            'suspicious': 75.0,
+            'phishing': 85.0,
+            'fraudulent': 90.0,
+            'scam': 88.0,
+            'malware': 95.0
+        }
+        risk_percentage = risk_scores.get(label.lower(), 50.0)
 
-        # Publish classification result to ESP32 via MQTT Service
-        send_to_mqtt_service(label, "shieldbox/email_scan", iot_enabled)
+        # Manual email scans don't send to ESP32 - only Telegram alerts
+        send_to_mqtt_service(label, risk_percentage, "shieldbox/email_scan", False, True, "manual")
 
         return jsonify({
             "status": label,
@@ -434,8 +467,18 @@ def forward_alert():
     iot_enabled = request.args.get("iot_enabled", "true").lower() == "true"  # Default to True
     
     try:
-        # Publish to ESP32 via MQTT Service
-        send_to_mqtt_service(alert_type, "shieldbox/extension_alert", iot_enabled)
+        # Calculate risk percentage for the alert type
+        risk_scores = {
+            'safe': 30.0,
+            'phishing': 85.0,
+            'scam': 88.0,
+            'fraudulent': 90.0,
+            'suspicious': 75.0
+        }
+        risk_percentage = risk_scores.get(alert_type.lower(), 50.0)
+        
+        # Extension alerts don't send to ESP32 - only Telegram alerts
+        send_to_mqtt_service(alert_type, risk_percentage, "shieldbox/extension_alert", False, True, "manual")
         
         return jsonify({"status": "sent", "type": alert_type}), 200
     except Exception as e:
