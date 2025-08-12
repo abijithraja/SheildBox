@@ -188,10 +188,9 @@ python test_telegram.py
 
 ## 🤝 Team Members
 
-- **Abijith Raja B** — Lead Developer, Chrome Extension & Backend
-- **[Teammate Name 1]** — IoT Hardware & ESP32 Programming
-- **[Teammate Name 2]** — Machine Learning & Model Training
-- **[Teammate Name 3]** — UI/UX Design & Frontend Integration
+- **Abijith Raja B** — Lead Developer, Chrome Extension & Backend ,IoT Hardware & ESP32 Programming
+- **Mithielesh N** — Machine Learning & Model Training,Chrome Extension
+- **SriVardhan k** — UI/UX Design & Frontend Integration
 
 ---
 
@@ -205,7 +204,7 @@ MIT License - see [LICENSE](LICENSE) file for details.
 
 **🛡️ Securing the Digital World, One Email at a Time**
 
-[![GitHub stars](https://img.shields.io/github/stars/abijithraja/ShieldBox?style=social)](https://github.com/abijithraja/ShieldBox/stargazers)
+[![GitHub stars](https://img.shields.io/github/stars/abijithraja/ShieldBox?style=social)](https://github.com/abijithraja/ShieldBox.git)
 
 *Built with ❤️ by the ShieldBox Team*
 
