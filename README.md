@@ -52,7 +52,7 @@
 
 ---
 
-## � Datasets & Training Data
+## Datasets & Training Data
 
 Our machine learning models are trained on comprehensive datasets from Kaggle to ensure high accuracy in threat detection.
 
@@ -70,7 +70,7 @@ Our machine learning models are trained on comprehensive datasets from Kaggle to
 
 ---
 
-## �🛠 IoT Hardware Setup
+## IoT Hardware Setup
 
 ### Components:
 - ESP32 development board
