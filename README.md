@@ -1,956 +1,129 @@
-# 🛡️ ShieldBox - Smart Email & URL Security System
-
-<div align="center">
-
-[![Python](https://img.shields.io/badge/Python-3.8+-blue?style=flat-square&logo=python)](https://python.org)
-[![Flask](https://img.shields.io/badge/Flask-2.0+-green?style=flat-square&logo=flask)](https://flask.palletsprojects.com/)
-[![Machine Learning](https://img.shields.io/badge/ML-Scikit%20Learn-orange?style=flat-square&logo=scikit-learn)](https://scikit-learn.org/)
-[![ESP32](https://img.shields.io/badge/IoT-ESP32-red?style=flat-square&logo=espressif)](https://espressif.com/)
-[![License](https://img.shields.io/badge/License-MIT-green?style=flat-square)](LICENSE)
-
-**A smart cybersecurity system that detects phishing emails and malicious URLs using machine learning, with real-time alerts via ESP32 hardware and Telegram notifications.**
-
-</div>
-
----
-
-## 🎯 What is ShieldBox?
-
-ShieldBox is a personal cybersecurity project that helps protect you from:
-- **📧 Fraudulent Emails**: Detects donation scams, phishing attempts, and spam
-- **🌐 Malicious URLs**: Identifies dangerous websites and phishing links  
-- **🚨 Real-time Alerts**: Physical alerts via ESP32 LEDs/buzzer + Telegram notifications
-- **🔍 Gmail Integration**: Browser extension for automatic email scanning
-
-## ✨ Features
-
-### 🧠 Smart Detection
-- **Email Analysis**: Distinguishes between safe, spam, phishing, and fraudulent emails
-- **URL Scanning**: Analyzes links for phishing indicators and malicious content
-- **Pattern Recognition**: Fast detection of common scam patterns (donation frauds, etc.)
-- **Auto-Scan Mode**: Automatic Gmail integration with ultra-fast processing
-
-### 🔔 Alert System  
-- **ESP32 Hardware**: Visual (LED) and audio (buzzer) alerts
-- **Telegram Bot**: Instant mobile notifications
-- **Chrome Extension**: Real-time web protection
-- **MQTT Communication**: Reliable message delivery
-
-## 🏗️ How It Works
-
-```
-📧 Email/URL Input → 🧠 ML Analysis → 🚨 Alert Decision → 📱 Notifications
-                                                    ↓
-                                               🔴🟢 ESP32 LEDs
-```
-
-### System Components
-- **Backend API** (Flask): Handles email/URL analysis
-- **Machine Learning Models**: Trained on email and URL datasets  
-- **Chrome Extension**: Integrates with Gmail for auto-scanning
-- **ESP32 Hardware**: Physical alert device with LEDs and buzzer
-- **MQTT Service**: Manages real-time communication
-- **Telegram Bot**: Sends mobile notifications
-
----
-
-## 🚀 Quick Setup
-
-### 1. Backend Setup
-```bash
-# Clone the project
-git clone https://github.com/abijithraja/ShieldBox.git
-cd ShieldBox/Backend
-
-# Install dependencies
-pip install -r requirements.txt
-
-# Start the services
-python main.py          # Main API (Port 5000)
-python mqtt_service.py  # MQTT Service (Port 5001)
-```
-
-### 2. Browser Extension
-1. Open Chrome → `chrome://extensions/`
-2. Enable "Developer mode"  
-3. Click "Load unpacked" → Select the `extension` folder
-4. Extension is now active in your browser!
-
-### 3. ESP32 Hardware (Optional)
-```cpp
-// Update WiFi credentials in Shieldboxalert.ino
-const char* ssid = "YOUR_WIFI_NAME";
-const char* password = "YOUR_WIFI_PASSWORD";
-
-// Upload to ESP32 via Arduino IDE
-```
-
-### 4. Telegram Bot (Optional)
-1. Message @BotFather on Telegram to create a bot
-2. Get your bot token and chat ID
-3. Update `mqtt_service.py` with your credentials
-
----
-
-## API Reference
-
-### Authentication
-
-All API endpoints support optional authentication for enterprise deployments:
-
-```http
-Authorization: Bearer <jwt_token>
-Content-Type: application/json
-```
-
-### Core Endpoints
-
-<details>
-<summary><b>� Email Analysis Endpoints</b></summary>
-
-#### Automated Email Scanning
-```http
-POST /scan-email-auto
-Content-Type: application/json
-
-{
-  "subject": "Email subject line",
-  "body": "Complete email content",
-  "iot_enabled": true,
-  "metadata": {
-    "sender": "sender@example.com",
-    "timestamp": "2024-01-01T12:00:00Z"
-  }
-}
-```
-
-**Response Schema:**
-```json
-{
-  "status": "safe|spam|phishing|fraudulent",
-  "confidence": 0.95,
-  "reason": "Classification reasoning",
-  "risk_score": 0.85,
-  "performance": {
-    "prediction_time": 45.2,
-    "total_time": 67.8,
-    "cache_hit": true
-  },
-  "metadata": {
-    "model_version": "v2.1.0",
-    "processed_at": "2024-01-01T12:00:01Z"
-  }
-}
-```
-
-#### Manual Email Analysis
-```http
-POST /scan-email
-Content-Type: application/json
-
-{
-  "subject": "Email subject",
-  "body": "Email content",
-  "iot_enabled": true
-}
-```
-
-</details>
-
-<details>
-<summary><b>🌐 URL Security Endpoints</b></summary>
-
-#### URL Threat Analysis
-```http
-POST /scan-link
-Content-Type: application/json
-
-{
-  "url": "https://suspicious-domain.com/path",
-  "iot_enabled": true,
-  "context": {
-    "referrer": "email",
-    "user_agent": "Mozilla/5.0..."
-  }
-}
-```
-
-**Response Schema:**
-```json
-{
-  "url": "https://suspicious-domain.com/path",
-  "status": "safe|phishing|malware|suspicious",
-  "probability": 0.8542,
-  "risk_factors": [
-    "suspicious_domain_age",
-    "unusual_url_structure",
-    "no_ssl_certificate"
-  ],
-  "features": {
-    "domain_age": 5,
-    "url_length": 87,
-    "subdomain_count": 3,
-    "ssl_valid": false
-  }
-}
-```
-
-</details>
-
-<details>
-<summary><b>🔔 Notification Endpoints</b></summary>
-
-#### Direct Telegram Alerts
-```http
-POST /send-telegram
-Content-Type: application/json
-
-{
-  "message": "Custom alert message",
-  "type": "test|alert|threat|info",
-  "priority": "high|medium|low"
-}
-```
-
-#### MQTT Message Publishing
-```http
-POST /mqtt-publish
-Content-Type: application/json
-
-{
-  "message": "alert_message",
-  "topic": "shieldbox/custom_topic",
-  "telegram_enabled": true,
-  "retain": false,
-  "qos": 1
-}
-```
-
-</details>
-
-### Error Handling
-
-All endpoints follow consistent error response format:
-
-```json
-{
-  "error": {
-    "code": "INVALID_REQUEST",
-    "message": "Detailed error description",
-    "details": {
-      "field": "subject",
-      "issue": "Field is required"
-    }
-  },
-  "request_id": "req_123456789",
-  "timestamp": "2024-01-01T12:00:00Z"
-}
-```
-
-### Rate Limiting
-
-| Endpoint | Rate Limit | Burst Limit |
-|----------|------------|-------------|
-| `/scan-email-auto` | 100/minute | 10/second |
-| `/scan-email` | 50/minute | 5/second |
-| `/scan-link` | 200/minute | 20/second |
-| `/send-telegram` | 30/minute | 3/second |
-
----
-
-## Installation Guide
-
-### Development Environment Setup
-
-<details>
-<summary><b>🐍 Python Backend Configuration</b></summary>
-
-```bash
-# Create isolated environment
-python -m venv shieldbox-env
-
-# Activate environment
-# Linux/macOS:
-source shieldbox-env/bin/activate
-# Windows:
-shieldbox-env\Scripts\activate
-
-# Upgrade pip and install dependencies
-python -m pip install --upgrade pip
-cd Backend
-pip install -r requirements.txt
-
-# Verify installation
-python -c "import sklearn, flask, joblib; print('✅ All dependencies installed')"
-```
-
-**Environment Variables Configuration:**
-```bash
-# Create .env file
-cat > .env << EOF
-FLASK_ENV=development
-FLASK_DEBUG=true
-TELEGRAM_BOT_TOKEN=your_bot_token_here
-TELEGRAM_CHAT_ID=your_chat_id_here
-MQTT_BROKER=broker.hivemq.com
-MQTT_PORT=1883
-EOF
-```
-
-</details>
-
-<details>
-<summary><b>🌐 Browser Extension Development</b></summary>
-
-```bash
-# Extension development setup
-cd extension/
-
-# Install development tools (optional)
-npm init -y
-npm install --save-dev web-ext
-
-# Load extension for development
-# 1. Open Chrome → chrome://extensions/
-# 2. Enable "Developer mode"
-# 3. Click "Load unpacked"
-# 4. Select the extension/ directory
-
-# Test extension functionality
-# Open any webpage and verify ShieldBox panel appears
-```
-
-**Extension Permissions Setup:**
-- Host permissions for Gmail and local development
-- Storage permissions for settings persistence
-- Scripting permissions for content injection
-
-</details>
-
-<details>
-<summary><b>� IoT Hardware Setup</b></summary>
-
-**Hardware Requirements:**
-```
-ESP32 Development Board
+ShieldBox - Advanced Email, URL & IoT Security System
+ShieldBox is a comprehensive Chrome extension with IoT integration that protects users from phishing attacks, fraudulent emails, spam, and malware by analyzing both URLs and email content in real-time using advanced machine learning algorithms. It not only alerts you in the browser but also sends real-time phishing alerts to an IoT device, complete with LED indicators, an LCD/OLED display, buzzer/voice module, and Telegram notifications for maximum security awareness.
+
+🚀 Features
+Email Security & Analysis
+Real-time Email Scanning: Automatically detects phishing emails as you open them
+
+Manual Email Analysis: Scan specific emails on-demand with detailed threat assessment
+
+Advanced Threat Detection: Identifies phishing, fraud, malware, spam, and legitimate emails
+
+Visual Security Indicators: Color-coded badges and alerts for different threat levels
+
+Gmail Integration: Seamless integration with Gmail interface
+
+Auto-Scan Toggle: Enable/disable automatic email monitoring with intelligent UI hiding
+
+URL & Link Protection
+Manual URL Scanning: Paste and analyze any URL for security threats
+
+Link Validation: Advanced URL pattern matching and threat detection
+
+Real-time Results: Instant feedback on link safety status
+
+Multiple Threat Categories: Detects phishing, spam, fraud, malware, and safe links
+
+IoT Security Alerts
+ESP32 Integration: Connects your ShieldBox backend to an ESP32-based IoT security device
+
+LED Indicators:
+
+🔴 Red LED for dangerous/phishing/fraud/malware emails
+
+🟢 Green LED for safe/legitimate emails
+
+LCD/OLED Display: Shows email classification, risk percentage, and sender authenticity
+
+Buzzer/Voice Alerts: Plays alert tones or voice warnings for dangerous emails
+
+Telegram Notifications: Sends real-time alerts to your mobile device via Telegram Bot API
+
+MQTT Protocol: Secure and lightweight messaging between backend and IoT hardware
+
+📁 Project Structure
+bash
+Copy
+Edit
+ShieldBox/
+├── Backend/                     # Python ML backend
+│   ├── dataset_phishing.csv
+│   ├── feature_extractor.py
+│   ├── feature_scaler.pkl
+│   ├── main.py                   # FastAPI backend server
+│   ├── mqtt_server.py            # MQTT + Telegram alert handling
+│   ├── phishing_model.pkl
+│   ├── phishing_model_package.pkl
+│   ├── requirements.txt
+│   └── train_model.py
+│
+├── extension/                    # Chrome extension
+│   ├── background.js
+│   ├── content-script.js
+│   ├── emailParser.js
+│   ├── floatingpanel.html
+│   ├── floatingpanel.js
+│   ├── manifest.json
+│   ├── popup.html
+│   ├── popup.js
+│   └── style.css
+│
+└── IoT/                          # ESP32 IoT firmware
+    ├── shieldbox_iot.ino          # Main Arduino/ESP32 code
+    ├── libraries/                 # Required libraries (WiFi, PubSubClient, etc.)
+    └── wiring_diagram.png         # Hardware connection diagram
+🔍 Email Classification System
+Email Type	Description	Visual Indicator	Browser Behavior	IoT Behavior
+Phishing	Steals credentials/personal info	🚨 Red badge	High-priority warning	Red LED, buzzer, Telegram alert
+Fraud	Financial scams & deception	💰 Orange badge	Financial threat alert	Red LED, buzzer
+Malware	Harmful attachments/links	🦠 Purple badge	Malware warning	Red LED, buzzer
+Spam	Unsolicited marketing	📧 Yellow badge	Spam notification	Yellow icon on LCD
+Safe	Verified safe emails	✅ Green badge	Safe confirmation	Green LED
+
+🛠 IoT Hardware Setup
 Components:
-  - Red LED (5mm) + 220Ω resistor
-  - Green LED (5mm) + 220Ω resistor  
-  - Passive buzzer
-  - Breadboard and jumper wires
 
-Connections:
-  GPIO 5  → Red LED (+ resistor)
-  GPIO 18 → Green LED (+ resistor)
-  GPIO 19 → Buzzer
-  GND     → Common ground
-```
+ESP32 development board
 
-**Arduino IDE Configuration:**
-```cpp
-// Install ESP32 board package:
-// File → Preferences → Additional Board Manager URLs:
-// https://dl.espressif.com/dl/package_esp32_index.json
+RGB LED or separate Red/Green LEDs
 
-// Select Board: ESP32 Dev Module
-// Upload Speed: 921600
-// Flash Frequency: 80MHz
-```
+LCD/OLED Display (e.g., 16x2 I2C LCD)
 
-</details>
+Active Buzzer or ISD1820 Voice Module for audio alerts
 
-### Production Deployment
+220Ω Resistor (for LEDs)
 
-<details>
-<summary><b>🚀 Docker Deployment</b></summary>
+Mini Breadboard & Jumper Wires
 
-```dockerfile
-# Dockerfile
-FROM python:3.9-slim
+Functionality Flow:
 
-WORKDIR /app
-COPY Backend/ .
-RUN pip install -r requirements.txt
+Email is scanned in Chrome extension
 
-EXPOSE 5000 5001
-CMD ["gunicorn", "--bind", "0.0.0.0:5000", "main:app"]
-```
+Classification & risk percentage sent to backend
 
-```yaml
-# docker-compose.yml
-version: '3.8'
-services:
-  shieldbox-api:
-    build: .
-    ports:
-      - "5000:5000"
-      - "5001:5001"
-    environment:
-      - FLASK_ENV=production
-    volumes:
-      - ./models:/app/models
-      
-  mqtt-broker:
-    image: eclipse-mosquitto:latest
-    ports:
-      - "1883:1883"
-      - "9001:9001"
-```
+Backend publishes alert via MQTT to ESP32
 
-</details>
+ESP32 displays data on LCD, lights LED, and triggers buzzer/voice alert
 
-<details>
-<summary><b>☁️ Cloud Deployment Options</b></summary>
+Telegram message is sent simultaneously for remote alerts
 
-**AWS Deployment:**
-```bash
-# EC2 + Elastic Beanstalk
-eb init shieldbox-app
-eb create production-env
-eb deploy
-```
+🔧 Installation & Setup
+Backend + IoT Setup
+Start backend server (python main.py)
 
-**Google Cloud Platform:**
-```bash
-# App Engine deployment
-gcloud app deploy app.yaml
-gcloud app browse
-```
+Start MQTT server (python mqtt_server.py)
 
-**Azure Deployment:**
-```bash
-# Azure App Service
-az webapp create --resource-group ShieldBox --plan ShieldBoxPlan --name shieldbox-api
-az webapp deployment source config-zip --src shieldbox.zip
-```
+Flash ESP32 firmware (shieldbox_iot.ino) via Arduino IDE
 
-</details>
+Connect ESP32 to Wi-Fi and MQTT broker
 
----
+Open Gmail — IoT alerts will trigger automatically
 
-## Performance Metrics
+🤝 Team Members
+Abijith Raja B — Lead Developer, Chrome Extension & Backend
 
-### Benchmark Results
+[Teammate Name 1] — IoT Hardware & ESP32 Programming
 
-Performance metrics collected from production deployments and stress testing:
+[Teammate Name 2] — Machine Learning & Model Training
 
-<table>
-<tr>
-<td width="50%">
-
-**Latency Metrics**
-| Metric | Mean | 95th %ile | 99th %ile |
-|--------|------|-----------|-----------|
-| Email Scan | 45ms | 78ms | 120ms |
-| URL Analysis | 32ms | 67ms | 98ms |
-| Pattern Matching | 8ms | 15ms | 25ms |
-| MQTT Delivery | 12ms | 23ms | 45ms |
-| End-to-End | 89ms | 156ms | 245ms |
-
-</td>
-<td width="50%">
-
-**Accuracy Metrics**
-| Model Type | Accuracy | Precision | Recall | F1-Score |
-|------------|----------|-----------|--------|----------|
-| Email Classifier | 96.8% | 0.952 | 0.943 | 0.947 |
-| URL Analyzer | 94.2% | 0.931 | 0.915 | 0.923 |
-| Pattern Engine | 99.1% | 0.987 | 0.994 | 0.990 |
-| Combined System | 97.3% | 0.961 | 0.948 | 0.954 |
-
-</td>
-</tr>
-</table>
-
-### Scalability Analysis
-
-```yaml
-Load Testing Results:
-  Concurrent Users: 1000
-  Test Duration: 60 minutes
-  Total Requests: 2.4M
-  
-Performance Metrics:
-  Avg Response Time: 78ms
-  Throughput: 667 req/sec
-  Error Rate: 0.02%
-  CPU Utilization: 45%
-  Memory Usage: 2.8GB
-  
-Scaling Capacity:
-  Estimated Max Users: 5000+
-  Horizontal Scaling: Linear
-  Bottleneck: Database queries
-```
-
-### Resource Utilization
-
-| Component | CPU Usage | Memory | Network I/O | Storage |
-|-----------|-----------|--------|-------------|---------|
-| API Server | 25-40% | 1.2GB | 50Mbps | 100MB |
-| ML Engine | 15-30% | 800MB | Minimal | 2GB |
-| MQTT Service | 5-10% | 200MB | 5Mbps | 50MB |
-| Total System | 45-80% | 2.2GB | 55Mbps | 2.15GB |
-
----
-
-## Security Framework
-
-### Threat Model
-
-ShieldBox addresses the following threat vectors:
-
-<details>
-<summary><b>🎯 Primary Threats</b></summary>
-
-**Email-Based Threats:**
-- Phishing campaigns targeting credentials
-- Business Email Compromise (BEC)
-- Donation/charity scams
-- Malware distribution via attachments
-- Social engineering attacks
-
-**URL-Based Threats:**
-- Malicious domain redirects
-- Fake login pages
-- Drive-by downloads
-- Typosquatting domains
-- Certificate spoofing
-
-</details>
-
-### Security Controls
-
-| Control Type | Implementation | Coverage |
-|--------------|----------------|----------|
-| **Input Validation** | Comprehensive sanitization | 100% of endpoints |
-| **Authentication** | JWT + API keys | All production endpoints |
-| **Encryption** | TLS 1.3 in transit | All communications |
-| **Rate Limiting** | Token bucket algorithm | API protection |
-| **Audit Logging** | Structured logging | All user actions |
-
-### Privacy Protection
-
-```yaml
-Data Handling:
-  - No persistent storage of email content
-  - Local processing for sensitive data
-  - GDPR compliant data handling
-  - User consent management
-  
-Privacy Features:
-  - Anonymized analytics
-  - Opt-out mechanisms
-  - Data retention policies
-  - Right to deletion
-```
-
-### Compliance & Certifications
-
-- **GDPR**: Full compliance with EU data protection regulations
-- **SOC 2 Type II**: Security and availability controls (in progress)
-- **ISO 27001**: Information security management (planned)
-- **NIST Framework**: Cybersecurity framework alignment
-
----
-
-## Deployment Options
-
-### Development Environment
-
-```bash
-# Local development setup
-git clone https://github.com/abijithraja/ShieldBox.git
-cd ShieldBox/Backend
-python -m venv venv
-source venv/bin/activate
-pip install -r requirements.txt
-python main.py
-```
-
-### Production Deployment
-
-<details>
-<summary><b>🐳 Docker Containerization</b></summary>
-
-```dockerfile
-# Production Dockerfile
-FROM python:3.9-slim AS base
-
-WORKDIR /app
-COPY Backend/requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
-
-FROM base AS production
-COPY Backend/ .
-EXPOSE 5000 5001
-
-# Health check
-HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-  CMD curl -f http://localhost:5000/health || exit 1
-
-CMD ["gunicorn", "--bind", "0.0.0.0:5000", "--workers", "4", "main:app"]
-```
-
-```yaml
-# docker-compose.yml for production
-version: '3.8'
-services:
-  shieldbox-api:
-    build: 
-      context: .
-      target: production
-    ports:
-      - "5000:5000"
-      - "5001:5001"
-    environment:
-      - FLASK_ENV=production
-      - WORKERS=4
-    volumes:
-      - ./models:/app/models:ro
-      - ./logs:/app/logs
-    restart: unless-stopped
-    
-  nginx:
-    image: nginx:alpine
-    ports:
-      - "80:80"
-      - "443:443"
-    volumes:
-      - ./nginx.conf:/etc/nginx/nginx.conf:ro
-      - ./ssl:/etc/nginx/ssl:ro
-    depends_on:
-      - shieldbox-api
-    restart: unless-stopped
-```
-
-</details>
-
-<details>
-<summary><b>☁️ Cloud Deployment</b></summary>
-
-**AWS Deployment with Terraform:**
-```hcl
-# main.tf
-resource "aws_ecs_cluster" "shieldbox" {
-  name = "shieldbox-cluster"
-  
-  setting {
-    name  = "containerInsights"
-    value = "enabled"
-  }
-}
-
-resource "aws_ecs_service" "shieldbox_api" {
-  name            = "shieldbox-api"
-  cluster         = aws_ecs_cluster.shieldbox.id
-  task_definition = aws_ecs_task_definition.shieldbox.arn
-  desired_count   = 2
-  
-  load_balancer {
-    target_group_arn = aws_lb_target_group.shieldbox.arn
-    container_name   = "shieldbox-api"
-    container_port   = 5000
-  }
-}
-```
-
-**Kubernetes Deployment:**
-```yaml
-# k8s-deployment.yaml
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: shieldbox-api
-spec:
-  replicas: 3
-  selector:
-    matchLabels:
-      app: shieldbox-api
-  template:
-    metadata:
-      labels:
-        app: shieldbox-api
-    spec:
-      containers:
-      - name: shieldbox-api
-        image: shieldbox/api:latest
-        ports:
-        - containerPort: 5000
-        env:
-        - name: FLASK_ENV
-          value: "production"
-        resources:
-          requests:
-            memory: "512Mi"
-            cpu: "250m"
-          limits:
-            memory: "1Gi"
-            cpu: "500m"
-```
-
-</details>
-
-### Monitoring & Observability
-
-```yaml
-# Monitoring Stack
-Metrics Collection:
-  - Prometheus (metrics aggregation)
-  - Grafana (visualization)
-  - AlertManager (alerting)
-  
-Logging:
-  - ELK Stack (Elasticsearch, Logstash, Kibana)
-  - Structured JSON logging
-  - Log aggregation and analysis
-  
-Tracing:
-  - Jaeger (distributed tracing)
-  - OpenTelemetry integration
-  - Performance bottleneck identification
-
-Health Checks:
-  - Kubernetes liveness/readiness probes
-  - Custom health endpoints
-  - Dependency health monitoring
-```
-
----
-
-## Contributing
-
-### Development Workflow
-
-We follow the [GitFlow](https://www.atlassian.com/git/tutorials/comparing-workflows/gitflow-workflow) branching strategy for organized development:
-
-```mermaid
-gitgraph
-    commit id: "Initial"
-    branch develop
-    checkout develop
-    commit id: "Feature base"
-    branch feature/auth
-    checkout feature/auth
-    commit id: "Add authentication"
-    commit id: "Add tests"
-    checkout develop
-    merge feature/auth
-    branch release/v1.1
-    checkout release/v1.1
-    commit id: "Version bump"
-    commit id: "Bug fixes"
-    checkout main
-    merge release/v1.1
-    tag: "v1.1.0"
-    checkout develop
-    merge main
-```
-
-### Contribution Guidelines
-
-<details>
-<summary><b>� Code Standards</b></summary>
-
-**Python Code Style:**
-```python
-# Follow PEP 8 guidelines
-# Use type hints
-def process_email(subject: str, body: str) -> dict:
-    """Process email content for threat analysis.
-    
-    Args:
-        subject: Email subject line
-        body: Email body content
-        
-    Returns:
-        Classification result dictionary
-    """
-    pass
-
-# Use docstrings for all functions
-# Maximum line length: 88 characters
-# Use black for code formatting
-```
-
-**JavaScript Standards:**
-```javascript
-// Use ES6+ features
-// Follow Airbnb style guide
-// Use JSDoc for documentation
-/**
- * Analyzes email content for threats
- * @param {string} subject - Email subject
- * @param {string} body - Email body
- * @returns {Promise<Object>} Analysis result
- */
-async function analyzeEmail(subject, body) {
-  // Implementation
-}
-```
-
-</details>
-
-<details>
-<summary><b>🧪 Testing Requirements</b></summary>
-
-**Test Coverage Expectations:**
-- Minimum 90% code coverage
-- Unit tests for all functions
-- Integration tests for API endpoints
-- End-to-end tests for critical paths
-
-**Testing Commands:**
-```bash
-# Run all tests
-pytest --cov=. --cov-report=html
-
-# Run specific test categories
-pytest tests/unit/
-pytest tests/integration/
-pytest tests/performance/
-
-# Linting and formatting
-black .
-flake8 .
-mypy .
-```
-
-</details>
-
-### Issue Management
-
-| Label | Purpose | Priority |
-|-------|---------|----------|
-| `bug` | Software defects | High |
-| `enhancement` | New features | Medium |
-| `documentation` | Doc improvements | Low |
-| `security` | Security issues | Critical |
-| `performance` | Performance optimization | Medium |
-
-### Pull Request Process
-
-1. **Fork & Branch**: Create feature branch from `develop`
-2. **Develop**: Implement changes with tests
-3. **Test**: Ensure all tests pass
-4. **Document**: Update relevant documentation
-5. **Submit**: Create PR with detailed description
-6. **Review**: Address feedback from maintainers
-7. **Merge**: Squash merge to `develop`
-
----
-
-## Enterprise Support
-
-### Professional Services
-
-<table>
-<tr>
-<td width="50%">
-
-**Technical Support**
-- 24/7 incident response
-- Dedicated support engineer
-- Priority bug fixes
-- Custom integration assistance
-- Training and onboarding
-
-**Service Level Agreements**
-- 99.9% uptime guarantee
-- <1 hour critical response
-- <4 hour issue resolution
-- Monthly health reports
-- Quarterly business reviews
-
-</td>
-<td width="50%">
-
-**Custom Development**
-- Feature development
-- Custom model training
-- Enterprise integrations
-- Compliance certifications
-- Security assessments
-
-**Deployment Support**
-- Cloud architecture design
-- Performance optimization
-- Scaling consultancy
-- Disaster recovery planning
-- Monitoring setup
-
-</td>
-</tr>
-</table>
-
-### Licensing Options
-
-| Edition | Features | Use Case | Pricing |
-|---------|----------|----------|---------|
-| **Community** | Core features, basic support | Small teams, personal use | Free |
-| **Professional** | Advanced features, priority support | Growing businesses | Contact Sales |
-| **Enterprise** | Full features, SLA, custom development | Large organizations | Contact Sales |
-
-### Contact Information
-
-<div align="center">
-
-[![Email](https://img.shields.io/badge/Email-support%40shieldbox.dev-blue?style=for-the-badge&logo=gmail)](mailto:support@shieldbox.dev)
-[![LinkedIn](https://img.shields.io/badge/LinkedIn-ShieldBox-0077B5?style=for-the-badge&logo=linkedin)](https://linkedin.com/company/shieldbox)
-[![Twitter](https://img.shields.io/badge/Twitter-@ShieldBoxDev-1DA1F2?style=for-the-badge&logo=twitter)](https://twitter.com/ShieldBoxDev)
-
-**Enterprise Sales**: enterprise@shieldbox.dev  
-**Technical Support**: support@shieldbox.dev  
-**Security Issues**: security@shieldbox.dev
-
-</div>
-
----
-
-## License & Legal
-
-### Open Source License
-
-```
-MIT License
-
-Copyright (c) 2024 ShieldBox
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
-```
-
-### Acknowledgments
-
-- **Scikit-learn** team for machine learning framework
-- **Flask** community for web framework
-- **ESP32** and **Arduino** ecosystems
-- **HiveMQ** for MQTT broker services
-- **Contributors** and **early adopters**
-
----
-
-<div align="center">
-
-**🛡️ Securing the Digital World, One Email at a Time**
-
-[![Star on GitHub](https://img.shields.io/github/stars/abijithraja/ShieldBox?style=social)](https://github.com/abijithraja/ShieldBox/stargazers)
-[![Watch on GitHub](https://img.shields.io/github/watchers/abijithraja/ShieldBox?style=social)](https://github.com/abijithraja/ShieldBox/watchers)
-[![Fork on GitHub](https://img.shields.io/github/forks/abijithraja/ShieldBox?style=social)](https://github.com/abijithraja/ShieldBox/network/members)
-
-*Built with ❤️ by the ShieldBox Team*
-
-[⬆️ Back to Top](#shieldbox---enterprise-cybersecurity-platform)
-
-</div>
+[Teammate Name 3] — UI/UX Design & Frontend Integration
