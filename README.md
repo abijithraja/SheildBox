@@ -52,7 +52,25 @@
 
 ---
 
-## 🛠 IoT Hardware Setup
+## � Datasets & Training Data
+
+Our machine learning models are trained on comprehensive datasets from Kaggle to ensure high accuracy in threat detection.
+
+### Manual URL Scan Dataset
+- **Dataset Source**: [Kaggle - Malicious URL Detection Dataset]()
+- **Description**: Comprehensive dataset for manual URL scanning and threat analysis
+- **Features**: URL structure, domain reputation, content analysis, threat classifications
+- **Usage**: Training models for paste-and-analyze URL functionality
+
+### Manual Email Scan Dataset  
+- **Dataset Source**: [Kaggle - Email Phishing Detection Dataset]()
+- **Description**: Email dataset for manual scanning and phishing detection
+- **Features**: Email content, headers, sender information, classification labels
+- **Usage**: Training models for on-demand email analysis
+
+---
+
+## �🛠 IoT Hardware Setup
 
 ### Components:
 - ESP32 development board
