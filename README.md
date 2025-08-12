@@ -52,7 +52,7 @@
 
 ---
 
-## � Datasets & Training Data
+## 📖 Datasets & Training Data
 
 Our machine learning models are trained on comprehensive datasets from Kaggle to ensure high accuracy in threat detection.
 
