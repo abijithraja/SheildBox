@@ -204,7 +204,8 @@ MIT License - see [LICENSE](LICENSE) file for details.
 
 **🛡️ Securing the Digital World, One Email at a Time**
 
-[![GitHub stars](https://img.shields.io/github/stars/abijithraja/ShieldBox?style=social)](https://github.com/abijithraja/ShieldBox.git)
+[![GitHub stars](https://img.shields.io/github/stars/abijithraja/SheildBox?style=social)](https://github.com/abijithraja/SheildBox)
+
 
 *Built with ❤️ by the ShieldBox Team*
 
